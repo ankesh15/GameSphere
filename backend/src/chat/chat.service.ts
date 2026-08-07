@@ -90,7 +90,11 @@ export class ChatService {
   private parseRoom(roomId: string):
     | { type: "match" | "clan"; id: string; objectId: Types.ObjectId }
     | null {
-    const [prefix, id] = roomId.split(":");
+    const [prefix, fullId] = roomId.split(":");
+    if (!fullId) {
+      return null;
+    }
+    const id = fullId.split("-")[0];
     if (!id || !Types.ObjectId.isValid(id)) {
       return null;
     }

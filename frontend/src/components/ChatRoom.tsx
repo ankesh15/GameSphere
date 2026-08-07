@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { getRoomMessages, ChatMessage } from "../api/chat";
 import { getGamerProfile } from "../api/profiles";
 import { useSocketStore } from "../store/socket";
+import { useAuthStore } from "../store/auth";
 import { MessageSquare, Send, Sparkles, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -14,6 +15,7 @@ const globalProfileCache: Record<string, string> = {};
 
 export default function ChatRoom({ roomId }: ChatRoomProps) {
   const socket = useSocketStore((state) => state.socket);
+  const currentUser = useAuthStore((state) => state.user);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [profiles, setProfiles] = useState<Record<string, string>>(() => ({ ...globalProfileCache }));
@@ -189,7 +191,7 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
           </div>
         ) : (
           messages.map((msg, idx) => {
-            const isMe = socket && msg.senderId === socket.id;
+            const isMe = currentUser && msg.senderId === currentUser.id;
             const senderTag = profiles[msg.senderId] || `Player_${msg.senderId.slice(-4)}`;
 
             return (

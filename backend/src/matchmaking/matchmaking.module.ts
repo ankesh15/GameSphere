@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { RealtimeModule } from "../realtime/realtime.module";
 import { MatchmakingController } from "./matchmaking.controller";
@@ -13,10 +13,10 @@ import { MatchingService } from "./matching.service";
       { name: MatchRequest.name, schema: MatchRequestSchema },
       { name: MatchSession.name, schema: MatchSessionSchema }
     ]),
-    RealtimeModule
+    forwardRef(() => RealtimeModule)
   ],
   controllers: [MatchmakingController],
   providers: [MatchmakingService, MatchingService],
-  exports: [MongooseModule]
+  exports: [MatchmakingService, MongooseModule]
 })
 export class MatchmakingModule {}

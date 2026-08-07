@@ -354,6 +354,21 @@ export class TournamentService {
     return `match_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   }
 
+  async getTournaments(): Promise<TournamentDocument[]> {
+    return this.tournamentModel.find()
+      .populate("participantIds", "username displayName avatar")
+      .sort({ createdAt: -1 });
+  }
+
+  async getTournament(tournamentId: string): Promise<TournamentDocument> {
+    const tournament = await this.tournamentModel.findById(tournamentId)
+      .populate("participantIds", "username displayName avatar");
+    if (!tournament) {
+      throw new NotFoundException("Tournament not found.");
+    }
+    return tournament;
+  }
+
   private async getTournamentOrThrow(tournamentId: string): Promise<TournamentDocument> {
     const tournament = await this.tournamentModel.findById(tournamentId);
     if (!tournament) {

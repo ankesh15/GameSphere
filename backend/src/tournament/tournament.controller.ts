@@ -81,4 +81,18 @@ export class TournamentController {
   ) {
     return this.tournamentService.verifyWinner(tournamentId, user, payload);
   }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getTournaments() {
+    return this.tournamentService.getTournaments();
+  }
+
+  @Get(":tournamentId")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getTournament(@Param("tournamentId") tournamentId: string) {
+    return this.tournamentService.getTournament(tournamentId);
+  }
 }

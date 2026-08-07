@@ -32,7 +32,7 @@ export class MatchSession {
     default: "pending",
     index: true
   })
-  status!: "pending" | "active" | "completed" | "cancelled" | "declined";
+  status!: "pending" | "active" | "completed" | "cancelled" | "declined" | "expired";
 
   @Prop({
     type: [Types.ObjectId],

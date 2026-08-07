@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException
 } from "@nestjs/common";
@@ -46,12 +47,27 @@ export class GamerProfilesService {
     return profile;
   }
 
-  async getProfileByUserId(userId: string): Promise<GamerProfileDocument> {
+  async getProfileByUserId(userId: string, requesterId?: string): Promise<any> {
     const profile = await this.profileModel.findOne({ userId });
     if (!profile) {
       throw new NotFoundException("Profile not found.");
     }
-    return profile;
+
+    if (!requesterId || requesterId === userId) {
+      return profile;
+    }
+
+    const privacy = profile.privacy ?? { isPublic: true, showOnlineStatus: true, showMatchHistory: true };
+    if (privacy.isPublic === false) {
+      throw new ForbiddenException("This profile is private.");
+    }
+
+    const profileObj = profile.toObject();
+    if (privacy.showOnlineStatus === false) {
+      profileObj.availability = [];
+    }
+
+    return profileObj;
   }
 
   async updateProfile(
@@ -106,7 +122,7 @@ export class GamerProfilesService {
     };
 
     const existingIndex = profile.gamingAccounts.findIndex(
-      (account) => account.provider === payload.provider
+      (account: any) => account.provider === payload.provider
     );
 
     if (existingIndex >= 0) {
@@ -129,7 +145,7 @@ export class GamerProfilesService {
 
     const profile = await this.getProfileByUserId(userId);
     profile.gamingAccounts = profile.gamingAccounts.filter(
-      (account) => account.provider !== provider
+      (account: any) => account.provider !== provider
     );
     await profile.save();
     return profile;
@@ -154,7 +170,7 @@ export class GamerProfilesService {
   ): Promise<GamerProfileDocument> {
     const profile = await this.getProfileByUserId(userId);
     const existingBadges = profile.badges ?? [];
-    const alreadyAwarded = existingBadges.some((item) => item.code === badge.code);
+    const alreadyAwarded = existingBadges.some((item: any) => item.code === badge.code);
     if (!alreadyAwarded) {
       profile.badges = existingBadges;
       profile.badges.push({

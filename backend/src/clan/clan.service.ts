@@ -225,6 +225,14 @@ export class ClanService {
     return member?.role ?? null;
   }
 
+  async getClans(): Promise<ClanDocument[]> {
+    return this.clanModel.find().sort({ name: 1 });
+  }
+
+  async getClan(clanId: string): Promise<ClanDocument> {
+    return this.getClanOrThrow(clanId);
+  }
+
   private async getClanOrThrow(clanId: string): Promise<ClanDocument> {
     const clan = await this.clanModel.findById(clanId);
     if (!clan) {

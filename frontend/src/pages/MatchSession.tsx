@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getMatchSession, MatchSession } from "../api/matchmaking";
+import { getMatchSession, MatchSession, completeMatchSession } from "../api/matchmaking";
 import { getGamerProfile, GamerProfile } from "../api/profiles";
 import { GAMES_CATALOG } from "../api/games";
 import ChatRoom from "../components/ChatRoom";
@@ -48,6 +48,18 @@ export default function MatchSessionPage() {
       setError(err.response?.data?.message || "Failed to load match session details.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCompleteSession = async () => {
+    if (!sessionId) return;
+    if (window.confirm("Do you want to complete this match session?")) {
+      try {
+        await completeMatchSession(sessionId);
+      } catch (err: any) {
+        console.error("Failed to complete match session on backend", err);
+      }
+      navigate("/app/find-teammates");
     }
   };
 
@@ -110,11 +122,7 @@ export default function MatchSessionPage() {
         </div>
         <div>
           <button
-            onClick={() => {
-              if (window.confirm("Do you want to complete this match session?")) {
-                navigate("/app/find-teammates");
-              }
-            }}
+            onClick={handleCompleteSession}
             className="px-5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-350 hover:text-white transition duration-200"
           >
             Complete Session

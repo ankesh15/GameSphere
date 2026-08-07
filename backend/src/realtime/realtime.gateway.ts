@@ -1,4 +1,4 @@
-import { Logger } from "@nestjs/common";
+import { forwardRef, Inject, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import {
@@ -17,6 +17,7 @@ import { AuthUser } from "../auth/types/auth-user";
 import { ChatService } from "../chat/chat.service";
 import { RealtimeService } from "./realtime.service";
 import { PresenceService } from "./presence.service";
+import { MatchmakingService } from "../matchmaking/matchmaking.service";
 
 type ChatSendPayload = {
   roomId: string;
@@ -54,7 +55,9 @@ export class RealtimeGateway
     private readonly presenceService: PresenceService,
     private readonly chatService: ChatService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(forwardRef(() => MatchmakingService))
+    private readonly matchmakingService: MatchmakingService
   ) {}
 
   afterInit(): void {
@@ -180,6 +183,40 @@ export class RealtimeGateway
       userId: user.sub,
       isTyping
     });
+  }
+
+  @SubscribeMessage("match.accepted")
+  async handleMatchAccepted(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { sessionId: string }
+  ) {
+    const user = this.requireUser(client);
+    const sessionId = payload?.sessionId;
+    if (!sessionId) {
+      throw new WsException("Missing sessionId.");
+    }
+    try {
+      return await this.matchmakingService.acceptMatch(sessionId, user.sub);
+    } catch (error: any) {
+      throw new WsException(error.message || "Failed to accept match.");
+    }
+  }
+
+  @SubscribeMessage("match.declined")
+  async handleMatchDeclined(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { sessionId: string }
+  ) {
+    const user = this.requireUser(client);
+    const sessionId = payload?.sessionId;
+    if (!sessionId) {
+      throw new WsException("Missing sessionId.");
+    }
+    try {
+      return await this.matchmakingService.declineMatch(sessionId, user.sub);
+    } catch (error: any) {
+      throw new WsException(error.message || "Failed to decline match.");
+    }
   }
 
   private extractToken(client: Socket): string | null {

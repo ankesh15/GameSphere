@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -46,6 +47,13 @@ export class MatchmakingController {
     }
   }
 
+  @Get("sessions/me")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getMyMatchSessions(@CurrentUser() user: AuthUser) {
+    return this.matchmakingService.getMyMatchSessions(user.sub);
+  }
+
   @Get("sessions/:sessionId")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
@@ -74,5 +82,32 @@ export class MatchmakingController {
     @Param("sessionId") sessionId: string
   ) {
     return this.matchmakingService.declineMatch(sessionId, user.sub);
+  }
+
+  @Post("sessions/:sessionId/complete")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  completeMatch(
+    @CurrentUser() user: AuthUser,
+    @Param("sessionId") sessionId: string
+  ) {
+    return this.matchmakingService.completeMatch(sessionId, user.sub);
+  }
+
+  @Get("requests/current")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getCurrentRequest(@CurrentUser() user: AuthUser) {
+    return this.matchmakingService.getCurrentRequest(user.sub);
+  }
+
+  @Delete("requests/:requestId")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  cancelRequest(
+    @CurrentUser() user: AuthUser,
+    @Param("requestId") requestId: string
+  ) {
+    return this.matchmakingService.cancelRequest(requestId, user.sub);
   }
 }

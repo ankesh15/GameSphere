@@ -41,12 +41,12 @@ export class GamerProfilesController {
 
   @Get("me")
   getMyProfile(@CurrentUser() user: AuthUser) {
-    return this.profilesService.getProfileByUserId(user.sub);
+    return this.profilesService.getProfileByUserId(user.sub, user.sub);
   }
 
   @Get(":userId")
-  getProfile(@Param("userId") userId: string) {
-    return this.profilesService.getProfileByUserId(userId);
+  getProfile(@Param("userId") userId: string, @CurrentUser() user: AuthUser) {
+    return this.profilesService.getProfileByUserId(userId, user.sub);
   }
 
   @Patch("me")

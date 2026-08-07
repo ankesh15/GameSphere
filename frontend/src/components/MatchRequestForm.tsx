@@ -1,5 +1,5 @@
-import { FormEvent, useMemo, useState } from "react";
-import { createMatchRequest } from "../api/matchmaking";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { createMatchRequest, cancelMatchRequest, getCurrentMatchRequest } from "../api/matchmaking";
 import { GAMES_CATALOG } from "../api/games";
 import { useSocketStore } from "../store/socket";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +21,7 @@ const DEFAULT_PING = 50;
 export default function MatchRequestForm() {
   const isQueued = useSocketStore((state) => state.isQueued);
   const queuedGameId = useSocketStore((state) => state.queuedGameId);
+  const queuedRequestId = useSocketStore((state) => state.queuedRequestId);
   const elapsedTime = useSocketStore((state) => state.elapsedTime);
   const setQueueState = useSocketStore((state) => state.setQueueState);
 
@@ -32,6 +33,29 @@ export default function MatchRequestForm() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Only check if we are not currently queued locally
+    if (!isQueued) {
+      getCurrentMatchRequest()
+        .then((request) => {
+          if (request && (request.status === "queued" || request.status === "matched")) {
+            if (request.status === "matched" && request.matchSessionId) {
+              // Redirect to match session
+              window.location.hash = `#/app/match/${request.matchSessionId}`;
+            } else if (request.status === "queued") {
+              setQueueState(true, request.gameId, request._id || (request as any).id);
+            }
+          }
+        })
+        .catch((err) => {
+          // Ignore 404 since it just means there is no active request
+          if (err.statusCode !== 404) {
+            console.error("Failed to check current matchmaking request status", err);
+          }
+        });
+    }
+  }, [isQueued, setQueueState]);
 
   const validationMessage = useMemo(() => {
     if (!gameId) return "Please select a game.";
@@ -72,6 +96,17 @@ export default function MatchRequestForm() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCancel = async () => {
+    if (queuedRequestId) {
+      try {
+        await cancelMatchRequest(queuedRequestId);
+      } catch (err: any) {
+        console.error("Failed to cancel matchmaking request on backend", err);
+      }
+    }
+    setQueueState(false);
   };
 
   const formatTime = (seconds: number) => {
@@ -127,17 +162,17 @@ export default function MatchRequestForm() {
 
             <div className="mt-6 pt-5 border-t border-slate-800/40 w-full grid grid-cols-2 gap-4 text-[10px] text-slate-400">
               <div className="text-center bg-slate-950/30 py-2 rounded-xl border border-slate-900">
-                <span className="text-slate-500 block uppercase font-bold tracking-wider">Estimated Wait</span>
+                <span className="text-slate-550 block uppercase font-bold tracking-wider">Estimated Wait</span>
                 <span className="text-slate-350 font-semibold block mt-0.5">02:15</span>
               </div>
               <div className="text-center bg-slate-950/30 py-2 rounded-xl border border-slate-900">
-                <span className="text-slate-500 block uppercase font-bold tracking-wider">Network Ping</span>
+                <span className="text-slate-550 block uppercase font-bold tracking-wider">Network Ping</span>
                 <span className="text-brand-400 font-semibold block mt-0.5">~32ms</span>
               </div>
             </div>
 
             <button
-              onClick={() => setQueueState(false)}
+              onClick={handleCancel}
               className="glow-button mt-8 w-full py-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-xs font-bold text-rose-400 transition"
             >
               Cancel Matchmaking Request

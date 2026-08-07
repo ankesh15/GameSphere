@@ -88,6 +88,20 @@ export class ClanController {
     return this.clanService.createEvent(clanId, user.sub, payload);
   }
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getClans() {
+    return this.clanService.getClans();
+  }
+
+  @Get(":clanId")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getClan(@Param("clanId") clanId: string) {
+    return this.clanService.getClan(clanId);
+  }
+
   @Get(":clanId/events")
   @UseGuards(JwtAuthGuard)
   listEvents(

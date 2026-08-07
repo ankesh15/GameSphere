@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
+  OnModuleInit,
   UnauthorizedException
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -15,7 +17,7 @@ import { MatchSession, MatchSessionDocument } from "./schemas/match-session.sche
 import { MatchingService } from "./matching.service";
 
 @Injectable()
-export class MatchmakingService {
+export class MatchmakingService implements OnModuleInit {
   private readonly logger = new Logger(MatchmakingService.name);
 
   constructor(
@@ -194,6 +196,36 @@ export class MatchmakingService {
     return session;
   }
 
+  async completeMatch(
+    sessionId: string,
+    userId: string
+  ): Promise<MatchSessionDocument> {
+    const session = await this.sessionModel.findById(sessionId);
+    if (!session) {
+      throw new NotFoundException("Match session not found.");
+    }
+
+    if (!session.playerIds.some((id) => id.toString() === userId)) {
+      throw new UnauthorizedException("Not authorized for this session.");
+    }
+
+    if (session.status === "completed") {
+      return session;
+    }
+
+    session.status = "completed";
+    session.endedAt = new Date();
+    await session.save();
+
+    await this.requestModel.updateMany(
+      { _id: { $in: session.requestIds } },
+      { $set: { status: "expired" } }
+    );
+
+    await this.notifyMatchCompleted(session);
+    return session;
+  }
+
   async getSession(sessionId: string, userId: string): Promise<MatchSessionDocument> {
     const session = await this.sessionModel.findById(sessionId);
     if (!session) {
@@ -203,6 +235,13 @@ export class MatchmakingService {
       throw new UnauthorizedException("Not authorized for this session.");
     }
     return session;
+  }
+
+  async getMyMatchSessions(userId: string): Promise<MatchSessionDocument[]> {
+    return this.sessionModel
+      .find({ playerIds: new Types.ObjectId(userId) })
+      .sort({ createdAt: -1 })
+      .limit(20);
   }
 
   private async notifyMatchOffer(session: MatchSessionDocument): Promise<void> {
@@ -250,6 +289,17 @@ export class MatchmakingService {
     );
   }
 
+  private async notifyMatchCompleted(session: MatchSessionDocument): Promise<void> {
+    await this.realtimeService.emitToUsers(
+      session.playerIds.map((id) => id.toString()),
+      "match.completed",
+      {
+        sessionId: session._id.toString(),
+        status: "completed"
+      }
+    );
+  }
+
   private buildSessionPayload(session: MatchSessionDocument) {
     return {
       sessionId: session._id.toString(),
@@ -268,5 +318,72 @@ export class MatchmakingService {
       status: "queued"
     });
     return Math.max(30, queuedCount * 12);
+  }
+
+  onModuleInit() {
+    setInterval(() => {
+      this.expireMatchSessions().catch((err) => {
+        this.logger.error("Error auto-expiring match sessions", err);
+      });
+    }, 5000);
+  }
+
+  async cancelRequest(requestId: string, userId: string): Promise<any> {
+    const request = await this.requestModel.findById(requestId);
+    if (!request) {
+      throw new NotFoundException("Matchmaking request not found.");
+    }
+    if (request.userId.toString() !== userId) {
+      throw new ForbiddenException("You do not own this matchmaking request.");
+    }
+    if (request.status !== "queued") {
+      throw new BadRequestException("Request is not active.");
+    }
+    request.status = "cancelled";
+    await request.save();
+    return { success: true, message: "Matchmaking request cancelled." };
+  }
+
+  async getCurrentRequest(userId: string): Promise<any> {
+    const request = await this.requestModel.findOne({
+      userId,
+      status: { $in: ["queued", "matched"] }
+    }).sort({ createdAt: -1 });
+
+    if (!request) {
+      throw new NotFoundException("No active matchmaking request found.");
+    }
+    return request;
+  }
+
+  async expireMatchSessions(): Promise<void> {
+    const expiredSessions = await this.sessionModel.find({
+      status: "pending",
+      expiresAt: { $lt: new Date() }
+    });
+
+    for (const session of expiredSessions) {
+      session.status = "expired" as any;
+      session.endedAt = new Date();
+      session.expiresAt = undefined;
+      await session.save();
+
+      await this.requestModel.updateMany(
+        { _id: { $in: session.requestIds } },
+        { $set: { status: "expired" }, $unset: { matchSessionId: "" } }
+      );
+
+      await this.notifyMatchExpired(session);
+    }
+  }
+
+  private async notifyMatchExpired(session: MatchSessionDocument): Promise<void> {
+    await this.realtimeService.emitToUsers(
+      session.playerIds.map((id) => id.toString()),
+      "match.expired",
+      {
+        sessionId: session._id.toString()
+      }
+    );
   }
 }
