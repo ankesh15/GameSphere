@@ -15,6 +15,8 @@ import { RealtimeModule } from "./realtime/realtime.module";
 import { TournamentModule } from "./tournament/tournament.module";
 import { UsersModule } from "./users/users.module";
 import { AiModule } from "./ai/ai.module";
+import { NotificationsModule } from "./notifications/notifications.module";
+
 
 const envSchema = Joi.object({
   NODE_ENV: Joi.string()
@@ -93,7 +95,8 @@ const envSchema = Joi.object({
     ChatModule,
     RealtimeModule,
     AiModule,
-    HealthModule
+    HealthModule,
+    NotificationsModule
   ],
   providers: [
     ErrorTrackingService,

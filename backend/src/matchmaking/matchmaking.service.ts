@@ -194,6 +194,17 @@ export class MatchmakingService {
     return session;
   }
 
+  async getSession(sessionId: string, userId: string): Promise<MatchSessionDocument> {
+    const session = await this.sessionModel.findById(sessionId);
+    if (!session) {
+      throw new NotFoundException("Match session not found.");
+    }
+    if (!session.playerIds.some((id) => id.toString() === userId)) {
+      throw new UnauthorizedException("Not authorized for this session.");
+    }
+    return session;
+  }
+
   private async notifyMatchOffer(session: MatchSessionDocument): Promise<void> {
     const payload = this.buildSessionPayload(session);
     await this.realtimeService.emitToUsers(

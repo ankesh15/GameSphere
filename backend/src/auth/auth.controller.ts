@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
   UseGuards
 } from "@nestjs/common";
@@ -16,30 +18,44 @@ import { AuthUser } from "./types/auth-user";
 
 @Controller("auth")
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
-  register(@Body() payload: RegisterDto): Promise<AuthTokens> {
+  async register(@Body() payload: RegisterDto): Promise<AuthTokens> {
+    this.logger.log(`POST /auth/register — email=${payload.email}`);
     return this.authService.register(payload);
   }
 
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  login(@Body() payload: LoginDto): Promise<AuthTokens> {
+  async login(@Body() payload: LoginDto): Promise<AuthTokens> {
+    this.logger.log(`POST /auth/login — email=${payload.email}`);
     return this.authService.login(payload);
   }
 
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
-  refresh(@Body() payload: RefreshTokenDto): Promise<AuthTokens> {
+  async refresh(@Body() payload: RefreshTokenDto): Promise<AuthTokens> {
+    this.logger.log("POST /auth/refresh");
     return this.authService.refresh(payload);
   }
 
   @Post("logout")
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@CurrentUser() user: AuthUser): Promise<void> {
+  @HttpCode(HttpStatus.OK)
+  async logout(@CurrentUser() user: AuthUser) {
+    this.logger.log(`POST /auth/logout — userId=${user.sub}`);
     await this.authService.logout(user.sub);
+    return { success: true, message: "Logged out successfully." };
+  }
+
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  async me(@CurrentUser() user: AuthUser) {
+    this.logger.log(`GET /auth/me — userId=${user.sub}`);
+    return this.authService.getMe(user.sub);
   }
 }

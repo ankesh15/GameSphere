@@ -13,6 +13,7 @@ import { SubmitMatchResultDto } from "./dto/submit-match-result.dto";
 import { VerifyWinnerDto } from "./dto/verify-winner.dto";
 import { Tournament, TournamentDocument } from "./schemas/tournament.schema";
 import { GamerProfilesService } from "../users/gamer-profiles.service";
+import { NotificationsService } from "../notifications/notifications.service";
 
 @Injectable()
 export class TournamentService {
@@ -21,7 +22,8 @@ export class TournamentService {
   constructor(
     @InjectModel(Tournament.name)
     private readonly tournamentModel: Model<TournamentDocument>,
-    private readonly profilesService: GamerProfilesService
+    private readonly profilesService: GamerProfilesService,
+    private readonly notificationsService: NotificationsService
   ) {}
 
   getHealth() {
@@ -106,6 +108,21 @@ export class TournamentService {
     tournament.bracket = rounds;
     tournament.status = "live";
     await tournament.save();
+
+    // Trigger notifications for all participants
+    for (const participantId of tournament.participantIds) {
+      this.notificationsService.create({
+        recipientId: participantId.toString(),
+        type: "tournament_update",
+        title: "Tournament Bracket Generated",
+        content: `The bracket for tournament "${tournament.name}" has been generated. The matches are now live!`,
+        data: {
+          tournamentId: tournament._id.toString(),
+          tournamentName: tournament.name
+        }
+      }).catch(() => {});
+    }
+
     return tournament.bracket;
   }
 
@@ -191,6 +208,34 @@ export class TournamentService {
         });
       } catch (error) {
         this.logger.warn("Failed to award tournament badge.");
+      }
+
+      // Notify winner
+      this.notificationsService.create({
+        recipientId: winnerId.toString(),
+        type: "achievement_unlock",
+        title: "Tournament Victory!",
+        content: `Congratulations! You won the tournament "${tournament.name}".`,
+        data: {
+          tournamentId: tournament._id.toString(),
+          tournamentName: tournament.name
+        }
+      }).catch(() => {});
+
+      // Notify other participants
+      for (const participantId of tournament.participantIds) {
+        if (participantId.toString() !== winnerId.toString()) {
+          this.notificationsService.create({
+            recipientId: participantId.toString(),
+            type: "tournament_update",
+            title: "Tournament Completed",
+            content: `The tournament "${tournament.name}" has completed. Congratulations to the winner!`,
+            data: {
+              tournamentId: tournament._id.toString(),
+              tournamentName: tournament.name
+            }
+          }).catch(() => {});
+        }
       }
     }
 

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
@@ -43,6 +44,16 @@ export class MatchmakingController {
         "Unable to queue matchmaking request."
       );
     }
+  }
+
+  @Get("sessions/:sessionId")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  getSession(
+    @CurrentUser() user: AuthUser,
+    @Param("sessionId") sessionId: string
+  ) {
+    return this.matchmakingService.getSession(sessionId, user.sub);
   }
 
   @Post("sessions/:sessionId/accept")

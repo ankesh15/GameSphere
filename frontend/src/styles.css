@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,5 +7,58 @@
 @layer base {
   body {
     @apply bg-slate-950 text-slate-100 antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+/* Glassmorphism Panel styles */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-panel-hover {
+  @apply transition-all duration-300 hover:border-brand-500/30 hover:shadow-2xl hover:shadow-brand-500/5;
+  background: rgba(15, 23, 42, 0.45);
+}
+.glass-panel-hover:hover {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+/* Text Gradients */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-indigo-300 to-purple-400;
+}
+
+.text-gradient-fire {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-amber-400 to-orange-500;
+}
+
+/* Glow button styling */
+.glow-button {
+  @apply relative overflow-hidden transition-all duration-300 active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.3)];
+}
+.glow-button:hover {
+  @apply shadow-[0_0_25px_rgba(139,92,246,0.45)];
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
 }

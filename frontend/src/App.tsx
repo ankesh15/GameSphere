@@ -11,6 +11,7 @@ import LandingPage from "./pages/Landing";
 import LoginPage from "./pages/Login";
 import NotFoundPage from "./pages/NotFound";
 import RegisterPage from "./pages/Register";
+import MatchSessionPage from "./pages/MatchSession";
 import TournamentsPage from "./pages/Tournaments";
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/app" element={<DashboardPage />} />
         <Route path="/app/profile" element={<GamerProfilePage />} />
         <Route path="/app/find-teammates" element={<FindTeammatesPage />} />
+        <Route path="/app/match/:sessionId" element={<MatchSessionPage />} />
         <Route path="/app/ai-discovery" element={<AIDiscoveryPage />} />
         <Route path="/app/tournaments" element={<TournamentsPage />} />
         <Route path="/app/clans" element={<ClansPage />} />

@@ -12,13 +12,15 @@ import { CreateClanEventDto } from "./dto/create-clan-event.dto";
 import { InviteMemberDto } from "./dto/invite-member.dto";
 import { UpdateClanRoleDto } from "./dto/update-clan-role.dto";
 import { Clan, ClanDocument } from "./schemas/clan.schema";
+import { NotificationsService } from "../notifications/notifications.service";
 
 type Role = "owner" | "admin" | "moderator" | "member";
 
 @Injectable()
 export class ClanService {
   constructor(
-    @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>
+    @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>,
+    private readonly notificationsService: NotificationsService
   ) {}
 
   getHealth() {
@@ -76,6 +78,23 @@ export class ClanService {
       createdAt: new Date()
     });
     await clan.save();
+
+    try {
+      await this.notificationsService.create({
+        recipientId: payload.userId,
+        senderId: inviterId,
+        type: "clan_invitation",
+        title: "Clan Invitation",
+        content: `You have been invited to join the clan ${clan.name}.`,
+        data: {
+          clanId: clan._id.toString(),
+          clanName: clan.name
+        }
+      });
+    } catch (err) {
+      // Don't fail the invite if notification service fails
+    }
+
     return clan;
   }
 

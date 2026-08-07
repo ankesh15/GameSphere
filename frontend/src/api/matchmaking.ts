@@ -15,6 +15,17 @@ export type MatchRequestResponse = {
   matchSessionId?: string;
 };
 
+export type MatchSession = {
+  _id: string;
+  gameId: string;
+  region: string;
+  playerIds: string[];
+  status: "pending" | "active" | "completed" | "cancelled" | "declined";
+  acceptedBy: string[];
+  startedAt?: string;
+  endedAt?: string;
+};
+
 export async function createMatchRequest(
   payload: MatchRequestPayload
 ): Promise<MatchRequestResponse> {
@@ -22,5 +33,10 @@ export async function createMatchRequest(
     "/matchmaking/requests",
     payload
   );
+  return response.data;
+}
+
+export async function getMatchSession(sessionId: string): Promise<MatchSession> {
+  const response = await apiClient.get<MatchSession>(`/matchmaking/sessions/${sessionId}`);
   return response.data;
 }

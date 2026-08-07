@@ -1,62 +1,129 @@
 import { useEffect, useState } from "react";
-import { getHealth, HealthStatus } from "../api/health";
+import { Clock, Trophy, Users, Gamepad2 } from "lucide-react";
+import { getMyProfile, GamerProfile } from "../api/profiles";
+import { useAuthStore } from "../store/auth";
+import HeroSection from "../components/dashboard/HeroSection";
+import StatsCard from "../components/dashboard/StatsCard";
+import QuickActions from "../components/dashboard/QuickActions";
+import ActivityFeed from "../components/dashboard/ActivityFeed";
+import MatchHistory from "../components/dashboard/MatchHistory";
+import Charts from "../components/dashboard/Charts";
+import MissionCard from "../components/dashboard/MissionCard";
+import FriendsPanel from "../components/dashboard/FriendsPanel";
 
 export default function DashboardPage() {
-  const [health, setHealth] = useState<HealthStatus | null>(null);
-  const [healthError, setHealthError] = useState<string | null>(null);
+  const user = useAuthStore((state) => state.user);
+  const [profile, setProfile] = useState<GamerProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-
-    getHealth()
-      .then((payload) => {
+    getMyProfile()
+      .then((p) => {
         if (isMounted) {
-          setHealth(payload);
-          setHealthError(null);
+          setProfile(p);
+          setLoading(false);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         if (isMounted) {
-          setHealthError(error instanceof Error ? error.message : "Unknown error");
+          setProfile(null);
+          setLoading(false);
         }
       });
-
     return () => {
       isMounted = false;
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-48 rounded-2xl bg-slate-900/60 border border-slate-800" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-32 rounded-2xl bg-slate-900/60 border border-slate-800" />
+          ))}
+        </div>
+        <div className="h-32 rounded-2xl bg-slate-900/60 border border-slate-800" />
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="h-96 rounded-2xl bg-slate-900/60 border border-slate-800" />
+          </div>
+          <div className="lg:col-span-4 space-y-6">
+            <div className="h-64 rounded-2xl bg-slate-900/60 border border-slate-800" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-        <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Track your sessions, matchmaking status, and communities.
-        </p>
+    <div className="space-y-6 pb-12">
+      {/* ── 1. Hero Section ───────────────────────────── */}
+      <HeroSection profile={profile} user={user} />
+
+      {/* ── 2. Top Stats Grid ─────────────────────────── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          label="Matches Played"
+          value={profile ? "142" : "0"}
+          icon={Gamepad2}
+          trend="up"
+          trendValue="+12"
+          accent="from-brand-500 to-purple-600"
+          delay={0.1}
+          sparklineData={[1, 3, 2, 5, 4, 8, 7]}
+        />
+        <StatsCard
+          label="Win Rate"
+          value={profile ? "58.2%" : "0%"}
+          icon={Trophy}
+          trend="up"
+          trendValue="+2.4%"
+          accent="from-emerald-500 to-teal-500"
+          delay={0.15}
+          sparklineData={[50, 52, 51, 55, 54, 58, 58.2]}
+        />
+        <StatsCard
+          label="Hours Played"
+          value={profile ? "342h" : "0h"}
+          icon={Clock}
+          trend="neutral"
+          trendValue="Avg 3h/day"
+          accent="from-amber-500 to-orange-500"
+          delay={0.2}
+          sparklineData={[3, 2, 4, 3, 5, 6, 3]}
+        />
+        <StatsCard
+          label="Teammates Met"
+          value={profile ? "89" : "0"}
+          icon={Users}
+          trend="up"
+          trendValue="+5"
+          accent="from-sky-500 to-blue-600"
+          delay={0.25}
+          sparklineData={[2, 1, 4, 2, 6, 3, 5]}
+        />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-          <h2 className="text-lg font-semibold text-white">API Health</h2>
-          {health ? (
-            <p className="mt-2 text-sm text-emerald-400">
-              {health.status} · {new Date(health.timestamp).toLocaleString()}
-            </p>
-          ) : healthError ? (
-            <p className="mt-2 text-sm text-rose-400">{healthError}</p>
-          ) : (
-            <p className="mt-2 text-sm text-slate-400">Checking...</p>
-          )}
-        </section>
+      {/* ── 3. Quick Actions ──────────────────────────── */}
+      <QuickActions />
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-          <h2 className="text-lg font-semibold text-white">Next Steps</h2>
-          <ul className="mt-3 space-y-2 text-sm text-slate-400">
-            <li>Complete your gamer profile.</li>
-            <li>Queue for a match with preferred latency.</li>
-            <li>Join a clan to coordinate sessions.</li>
-          </ul>
-        </section>
+      {/* ── 4. Main Content Split ─────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-12 items-start">
+        {/* Left Column: Feed, Charts, History (70%) */}
+        <div className="lg:col-span-8 space-y-6">
+          <Charts />
+          <ActivityFeed />
+          <MatchHistory />
+        </div>
+
+        {/* Right Column: Missions, Friends (30%) */}
+        <div className="lg:col-span-4 space-y-6 sticky top-24">
+          <MissionCard />
+          <FriendsPanel />
+        </div>
       </div>
     </div>
   );

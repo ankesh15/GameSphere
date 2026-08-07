@@ -1,10 +1,23 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type AuthUserData = {
+  id: string;
+  email: string;
+  username: string;
+  roles: string[];
+};
+
 type AuthState = {
   accessToken: string | null;
   refreshToken: string | null;
-  setTokens: (tokens: { accessToken: string; refreshToken: string }) => void;
+  user: AuthUserData | null;
+  setTokens: (tokens: {
+    accessToken: string;
+    refreshToken: string;
+    user?: AuthUserData;
+  }) => void;
+  setUser: (user: AuthUserData) => void;
   clearTokens: () => void;
 };
 
@@ -13,12 +26,16 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       accessToken: null,
       refreshToken: null,
+      user: null,
       setTokens: (tokens) =>
         set({
           accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken
+          refreshToken: tokens.refreshToken,
+          user: tokens.user ?? null
         }),
-      clearTokens: () => set({ accessToken: null, refreshToken: null })
+      setUser: (user) => set({ user }),
+      clearTokens: () =>
+        set({ accessToken: null, refreshToken: null, user: null })
     }),
     {
       name: "gamesphere-auth"

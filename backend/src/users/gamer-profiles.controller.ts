@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../common/guards/jwt-auth.guard";
@@ -33,9 +34,19 @@ export class GamerProfilesController {
     return this.profilesService.createProfile(user.sub, payload);
   }
 
+  @Get()
+  searchProfiles(@Query("q") query?: string) {
+    return this.profilesService.searchProfiles(query);
+  }
+
   @Get("me")
   getMyProfile(@CurrentUser() user: AuthUser) {
     return this.profilesService.getProfileByUserId(user.sub);
+  }
+
+  @Get(":userId")
+  getProfile(@Param("userId") userId: string) {
+    return this.profilesService.getProfileByUserId(userId);
   }
 
   @Patch("me")

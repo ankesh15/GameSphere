@@ -135,6 +135,19 @@ export class GamerProfilesService {
     return profile;
   }
 
+  async searchProfiles(query?: string): Promise<GamerProfileDocument[]> {
+    const filter = query
+      ? {
+          $or: [
+            { gamerTag: { $regex: query, $options: "i" } },
+            { displayName: { $regex: query, $options: "i" } },
+            { bio: { $regex: query, $options: "i" } }
+          ]
+        }
+      : {};
+    return this.profileModel.find(filter).limit(50).exec();
+  }
+
   async awardBadge(
     userId: string,
     badge: { code: string; label: string; source?: string }
