@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Loader2, UserPlus, AlertCircle, CheckCircle2, Gamepad2 } from "lucide-react";
 import { register } from "../api/auth";
 import { useAuthStore } from "../store/auth";
+import { validateRegistrationForm } from "../utils/validation";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -32,20 +33,15 @@ export default function RegisterPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setToast(null);
+
+    // Client-side validation using shared validator
+    const validation = validateRegistrationForm({ email, username, password });
+    if (validation.firstError) {
+      showToast("error", validation.firstError);
+      return;
+    }
+
     setLoading(true);
-
-    // Client-side validation
-    if (password.length < 8) {
-      showToast("error", "Password must be at least 8 characters.");
-      setLoading(false);
-      return;
-    }
-
-    if (username.length < 3) {
-      showToast("error", "Username must be at least 3 characters.");
-      setLoading(false);
-      return;
-    }
 
     try {
       const response = await register({ email, username, password });

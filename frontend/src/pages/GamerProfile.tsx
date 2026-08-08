@@ -10,6 +10,7 @@ import {
   AvailabilityItem
 } from "../api/profiles";
 import { GAMES_CATALOG } from "../api/games";
+import { useDialogStore } from "../store/dialog";
 import {
   User,
   Gamepad,
@@ -26,7 +27,10 @@ import {
   XCircle,
   Plus,
   Trash2,
-  Save
+  Save,
+  RotateCw,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -72,6 +76,7 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function GamerProfilePage() {
+  const { showAlert, showConfirm, showToast } = useDialogStore();
   const [profile, setProfile] = useState<GamerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +107,7 @@ export default function GamerProfilePage() {
 
   // Account Linking State
   const [linkingProvider, setLinkingProvider] = useState<"steam" | "riot" | "epic" | null>(null);
+  const [unlinkingProvider, setUnlinkingProvider] = useState<"steam" | "riot" | "epic" | null>(null);
   const [accountHandle, setAccountHandle] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
 
@@ -110,9 +116,13 @@ export default function GamerProfilePage() {
   const [showOnlineStatus, setShowOnlineStatus] = useState(true);
   const [showMatchHistory, setShowMatchHistory] = useState(true);
 
-  // General Notification Banner
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  // Per-handler saving states
+  const [detailsSaving, setDetailsSaving] = useState(false);
+  const [playstyleSaving, setPlaystyleSaving] = useState(false);
+  const [availabilitySaving, setAvailabilitySaving] = useState(false);
+  const [privacySaving, setPrivacySaving] = useState(false);
+  const [onboardingSaving, setOnboardingSaving] = useState(false);
+  const isSaving = detailsSaving || playstyleSaving || availabilitySaving || privacySaving || onboardingSaving;
 
   useEffect(() => {
     fetchProfile();
@@ -153,18 +163,13 @@ export default function GamerProfilePage() {
     setShowMatchHistory(data.privacy?.showMatchHistory !== false);
   };
 
-  const showNotification = (msg: string) => {
-    setSuccessMessage(msg);
-    setTimeout(() => setSuccessMessage(null), 4000);
-  };
-
   const handleOnboardingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGamerTag.trim()) {
-      setError("Gamer Tag is required.");
+      showAlert("Gamer Tag is required.", "Validation Error", "warning");
       return;
     }
-    setSaving(true);
+    setOnboardingSaving(true);
     setError(null);
     try {
       const data = await createProfile({
@@ -174,22 +179,21 @@ export default function GamerProfilePage() {
       });
       setProfileData(data);
       setOnboarding(false);
-      showNotification("Welcome to GameSphere! Profile created.");
+      showToast("Welcome to GameSphere! Profile created.", "success");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to create profile.");
+      showAlert(err.response?.data?.message || "Failed to create profile.", "Profile Creation Error", "error");
     } finally {
-      setSaving(false);
+      setOnboardingSaving(false);
     }
   };
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!gamerTag.trim()) {
-      setError("Gamer Tag cannot be empty.");
+      showAlert("Gamer Tag cannot be empty.", "Validation Error", "warning");
       return;
     }
-    setSaving(true);
-    setError(null);
+    setDetailsSaving(true);
     try {
       const data = await updateProfile({
         gamerTag: gamerTag.trim(),
@@ -201,18 +205,17 @@ export default function GamerProfilePage() {
         platforms
       });
       setProfileData(data);
-      showNotification("Profile details updated successfully.");
+      showToast("Profile details updated successfully.", "success");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update profile.");
+      showAlert(err.response?.data?.message || "Failed to update profile.", "Update Failed", "error");
     } finally {
-      setSaving(false);
+      setDetailsSaving(false);
     }
   };
 
   const handlePlaystyleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
+    setPlaystyleSaving(true);
     try {
       const data = await updateProfile({
         playstyle: {
@@ -222,33 +225,31 @@ export default function GamerProfilePage() {
         }
       });
       setProfileData(data);
-      showNotification("Playstyle settings saved.");
+      showToast("Playstyle settings saved.", "success");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update playstyle.");
+      showAlert(err.response?.data?.message || "Failed to update playstyle.", "Update Failed", "error");
     } finally {
-      setSaving(false);
+      setPlaystyleSaving(false);
     }
   };
 
   const handleAvailabilitySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
+    setAvailabilitySaving(true);
     try {
       const data = await updateAvailability(availability);
       setProfileData(data);
-      showNotification("Weekly availability schedule saved.");
+      showToast("Weekly availability schedule saved.", "success");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update availability.");
+      showAlert(err.response?.data?.message || "Failed to update availability.", "Update Failed", "error");
     } finally {
-      setSaving(false);
+      setAvailabilitySaving(false);
     }
   };
 
   const handlePrivacySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
+    setPrivacySaving(true);
     try {
       const data = await updateProfile({
         privacy: {
@@ -258,11 +259,11 @@ export default function GamerProfilePage() {
         }
       });
       setProfileData(data);
-      showNotification("Privacy settings updated.");
+      showToast("Privacy settings updated.", "success");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update privacy.");
+      showAlert(err.response?.data?.message || "Failed to update privacy.", "Update Failed", "error");
     } finally {
-      setSaving(false);
+      setPrivacySaving(false);
     }
   };
 
@@ -282,23 +283,33 @@ export default function GamerProfilePage() {
       setProfileData(data);
       setLinkingProvider(null);
       setAccountHandle("");
-      showNotification(`Successfully linked ${linkingProvider} account!`);
+      showToast(`Successfully linked ${linkingProvider} account!`, "success");
     } catch (err: any) {
       setLinkError(err.response?.data?.message || `Failed to link ${linkingProvider} account.`);
     }
   };
 
   const handleAccountUnlink = async (provider: "steam" | "riot" | "epic") => {
-    if (!window.confirm(`Are you sure you want to unlink your ${provider} account?`)) {
-      return;
-    }
-    try {
-      const data = await unlinkGamingAccount(provider);
-      setProfileData(data);
-      showNotification(`Successfully unlinked ${provider} account.`);
-    } catch (err: any) {
-      setError(err.response?.data?.message || `Failed to unlink ${provider} account.`);
-    }
+    showConfirm(
+      `Are you sure you want to unlink your ${provider} account? This cannot be undone.`,
+      async () => {
+        setUnlinkingProvider(provider);
+        try {
+          const data = await unlinkGamingAccount(provider);
+          setProfileData(data);
+          showToast(`Successfully unlinked ${provider} account.`, "success");
+        } catch (err: any) {
+          showAlert(
+            err.response?.data?.message || `Failed to unlink ${provider} account.`,
+            "Unlink Failed",
+            "error"
+          );
+        } finally {
+          setUnlinkingProvider(null);
+        }
+      },
+      `Unlink ${provider.charAt(0).toUpperCase() + provider.slice(1)} Account`
+    );
   };
 
   const toggleFavoriteGame = (id: string) => {
@@ -346,6 +357,25 @@ export default function GamerProfilePage() {
           <div className="h-64 rounded-2xl bg-slate-900/60 border border-slate-800 lg:col-span-1"></div>
           <div className="h-96 rounded-2xl bg-slate-900/60 border border-slate-800 lg:col-span-3"></div>
         </div>
+      </div>
+    );
+  }
+
+  if (!loading && error && !profile && !onboarding) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
+          <AlertCircle className="w-8 h-8 text-rose-500" />
+        </div>
+        <h2 className="text-xl font-black text-white tracking-tight">Profile Load Failed</h2>
+        <p className="mt-2 text-sm text-slate-400 max-w-md">{error}</p>
+        <button
+          onClick={fetchProfile}
+          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-sm font-bold text-white transition glow-button"
+        >
+          <RotateCw className="w-4 h-4" />
+          Retry
+        </button>
       </div>
     );
   }
@@ -399,18 +429,12 @@ export default function GamerProfilePage() {
               </select>
             </div>
 
-            {error && (
-              <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-sm text-rose-400">
-                {error}
-              </div>
-            )}
-
             <button
               type="submit"
-              disabled={saving}
-              className="glow-button w-full rounded-xl bg-brand-600 py-3.5 text-sm font-bold text-white transition hover:bg-brand-500"
+              disabled={onboardingSaving}
+              className="glow-button w-full rounded-xl bg-brand-600 py-3.5 text-sm font-bold text-white transition hover:bg-brand-500 disabled:opacity-50"
             >
-              {saving ? "Creating..." : "Initialize Profile"}
+              {onboardingSaving ? "Creating..." : "Initialize Profile"}
             </button>
           </form>
         </div>
@@ -482,26 +506,7 @@ export default function GamerProfilePage() {
         </div>
       </div>
 
-      {/* Success Notification Banner */}
-      <AnimatePresence>
-        {successMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-xs font-bold text-emerald-400"
-          >
-            {successMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Profile Error Banner */}
-      {error && (
-        <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-xs font-bold text-rose-400">
-          {error}
-        </div>
-      )}
 
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-4">
@@ -658,11 +663,11 @@ export default function GamerProfilePage() {
                 <div className="pt-4 border-t border-slate-900 flex justify-end">
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={detailsSaving}
                     className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{saving ? "Saving..." : "Save Identity"}</span>
+                    {detailsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{detailsSaving ? "Saving..." : "Save Identity"}</span>
                   </button>
                 </div>
               </form>
@@ -726,11 +731,11 @@ export default function GamerProfilePage() {
                 <div className="pt-4 border-t border-slate-900 flex justify-end">
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={playstyleSaving}
                     className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{saving ? "Saving..." : "Save Playstyle"}</span>
+                    {playstyleSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{playstyleSaving ? "Saving..." : "Save Playstyle"}</span>
                   </button>
                 </div>
               </form>
@@ -793,11 +798,11 @@ export default function GamerProfilePage() {
                 <div className="pt-4 border-t border-slate-900 flex justify-end">
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={availabilitySaving}
                     className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{saving ? "Saving..." : "Save Schedule"}</span>
+                    {availabilitySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{availabilitySaving ? "Saving..." : "Save Schedule"}</span>
                   </button>
                 </div>
               </form>
@@ -849,10 +854,11 @@ export default function GamerProfilePage() {
                         {linkedAcc ? (
                           <button
                             onClick={() => handleAccountUnlink(prov)}
-                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/20 text-rose-400 text-xs font-semibold transition"
+                            disabled={unlinkingProvider === prov}
+                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/20 text-rose-400 text-xs font-semibold transition disabled:opacity-50"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Unlink Handle</span>
+                            {unlinkingProvider === prov ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                            <span>{unlinkingProvider === prov ? "Unlinking..." : "Unlink Handle"}</span>
                           </button>
                         ) : (
                           <button
@@ -954,11 +960,11 @@ export default function GamerProfilePage() {
                 <div className="pt-4 border-t border-slate-900 flex justify-end">
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={privacySaving}
                     className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{saving ? "Saving..." : "Save Privacy"}</span>
+                    {privacySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <span>{privacySaving ? "Saving..." : "Save Privacy"}</span>
                   </button>
                 </div>
               </form>

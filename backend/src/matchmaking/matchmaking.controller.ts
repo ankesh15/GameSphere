@@ -9,6 +9,7 @@ import {
   Logger,
   Param,
   Post,
+  Query,
   UseGuards
 } from "@nestjs/common";
 import { MatchmakingService } from "./matchmaking.service";
@@ -50,8 +51,11 @@ export class MatchmakingController {
   @Get("sessions/me")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  getMyMatchSessions(@CurrentUser() user: AuthUser) {
-    return this.matchmakingService.getMyMatchSessions(user.sub);
+  getMyMatchSessions(
+    @CurrentUser() user: AuthUser,
+    @Query("status") status?: string
+  ) {
+    return this.matchmakingService.getMyMatchSessions(user.sub, status);
   }
 
   @Get("sessions/:sessionId")

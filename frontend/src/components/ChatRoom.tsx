@@ -3,7 +3,9 @@ import { getRoomMessages, ChatMessage } from "../api/chat";
 import { getGamerProfile } from "../api/profiles";
 import { useSocketStore } from "../store/socket";
 import { useAuthStore } from "../store/auth";
-import { MessageSquare, Send, Sparkles, User } from "lucide-react";
+import EmptyState from "./EmptyState";
+import ErrorAlert from "./ErrorAlert";
+import { MessageSquare, Send, Sparkles, User, AlertCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type ChatRoomProps = {
@@ -21,19 +23,11 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
   const [profiles, setProfiles] = useState<Record<string, string>>(() => ({ ...globalProfileCache }));
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
-
-  useEffect(() => {
-    fetchHistory();
-    setupSocketListeners();
-
-    return () => {
-      cleanupSocketListeners();
-    };
-  }, [roomId, socket]);
 
   useEffect(() => {
     scrollToBottom();
@@ -41,26 +35,30 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
 
   const fetchHistory = async () => {
     setLoading(true);
+    setError(null);
     try {
       const history = await getRoomMessages(roomId);
       setMessages(history);
       // Pre-fetch sender profiles for this batch
       const uniqueSenderIds = Array.from(new Set(history.map((m) => m.senderId)));
       uniqueSenderIds.forEach(resolveSenderTag);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to load chat history", err);
+      setError(err.response?.data?.message || "Failed to establish history connection for this room.");
     } finally {
       setLoading(false);
     }
   };
 
-  const setupSocketListeners = () => {
+  useEffect(() => {
+    fetchHistory();
+
     if (!socket) return;
 
     // Join room
     socket.emit("chat.join", { roomId });
 
-    socket.on("chat.message", (message: ChatMessage) => {
+    const handleChatMessage = (message: ChatMessage) => {
       if (message.roomId === roomId) {
         setMessages((prev) => {
           if (prev.some((m) => m.id === message.id)) return prev;
@@ -68,9 +66,9 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
         });
         resolveSenderTag(message.senderId);
       }
-    });
+    };
 
-    socket.on("chat.typing", (payload: { roomId: string; userId: string; isTyping: boolean }) => {
+    const handleChatTyping = (payload: { roomId: string; userId: string; isTyping: boolean }) => {
       if (payload.roomId === roomId) {
         setTypingUsers((prev) => {
           if (payload.isTyping) {
@@ -82,14 +80,22 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
         });
         resolveSenderTag(payload.userId);
       }
-    });
-  };
+    };
 
-  const cleanupSocketListeners = () => {
-    if (!socket) return;
-    socket.off("chat.message");
-    socket.off("chat.typing");
-  };
+    const handleConnect = () => {
+      socket.emit("chat.join", { roomId });
+    };
+
+    socket.on("chat.message", handleChatMessage);
+    socket.on("chat.typing", handleChatTyping);
+    socket.on("connect", handleConnect);
+
+    return () => {
+      socket.off("chat.message", handleChatMessage);
+      socket.off("chat.typing", handleChatTyping);
+      socket.off("connect", handleConnect);
+    };
+  }, [roomId, socket]);
 
   const resolveSenderTag = async (senderId: string) => {
     if (profiles[senderId] || globalProfileCache[senderId]) {
@@ -184,10 +190,22 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
             <Sparkles className="w-5 h-5 animate-pulse text-brand-400" />
             <span className="font-mono text-[10px]">fetching telemetry logs...</span>
           </div>
+        ) : error ? (
+          <div className="h-full flex items-center justify-center p-4">
+            <ErrorAlert
+              title="Chat History Unavailable"
+              message={error}
+              onRetry={fetchHistory}
+              retryLabel="Retry Loading History"
+            />
+          </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 space-y-2">
-            <MessageSquare className="w-8 h-8 text-slate-800" />
-            <p className="text-xs">Establish communications in this channel.</p>
+          <div className="h-full flex items-center justify-center p-4">
+            <EmptyState
+              icon={<MessageSquare className="w-8 h-8 text-slate-700" />}
+              title="No Messages Yet"
+              description="Establish communications in this channel by sending your first squad message below."
+            />
           </div>
         ) : (
           messages.map((msg, idx) => {

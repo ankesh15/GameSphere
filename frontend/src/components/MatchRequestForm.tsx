@@ -2,6 +2,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createMatchRequest, cancelMatchRequest, getCurrentMatchRequest } from "../api/matchmaking";
 import { GAMES_CATALOG } from "../api/games";
 import { useSocketStore } from "../store/socket";
+import { useDialogStore } from "../store/dialog";
+import { validateMatchRequestForm } from "../utils/validation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Compass,
@@ -24,6 +26,7 @@ export default function MatchRequestForm() {
   const queuedRequestId = useSocketStore((state) => state.queuedRequestId);
   const elapsedTime = useSocketStore((state) => state.elapsedTime);
   const setQueueState = useSocketStore((state) => state.setQueueState);
+  const { showAlert, showToast } = useDialogStore();
 
   const [gameId, setGameId] = useState(GAMES_CATALOG[0]?.gameId || "");
   const [region, setRegion] = useState("global");
@@ -33,6 +36,7 @@ export default function MatchRequestForm() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [canceling, setCanceling] = useState(false);
 
   useEffect(() => {
     // Only check if we are not currently queued locally
@@ -58,12 +62,8 @@ export default function MatchRequestForm() {
   }, [isQueued, setQueueState]);
 
   const validationMessage = useMemo(() => {
-    if (!gameId) return "Please select a game.";
-    if (skill < 1 || skill > 10) return "Skill must be between 1 and 10.";
-    if (pingMs < 0 || pingMs > 1000) return "Ping must be between 0 and 1000 ms.";
-    if (maxPingMs < 0 || maxPingMs > 1000) return "Max ping must be between 0 and 1000 ms.";
-    if (pingMs > maxPingMs) return "Ping cannot exceed max ping.";
-    return null;
+    const res = validateMatchRequestForm({ gameId, skill, pingMs, maxPingMs });
+    return res.firstError || null;
   }, [gameId, skill, pingMs, maxPingMs]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -99,14 +99,21 @@ export default function MatchRequestForm() {
   };
 
   const handleCancel = async () => {
-    if (queuedRequestId) {
-      try {
-        await cancelMatchRequest(queuedRequestId);
-      } catch (err: any) {
-        console.error("Failed to cancel matchmaking request on backend", err);
-      }
+    if (!queuedRequestId) {
+      setQueueState(false);
+      return;
     }
-    setQueueState(false);
+    setCanceling(true);
+    try {
+      await cancelMatchRequest(queuedRequestId);
+      showToast("Matchmaking request canceled", "info");
+      setQueueState(false);
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || "Failed to cancel matchmaking request on server.";
+      showAlert(errMsg, "Cancellation Error", "error");
+    } finally {
+      setCanceling(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -173,9 +180,11 @@ export default function MatchRequestForm() {
 
             <button
               onClick={handleCancel}
-              className="glow-button mt-8 w-full py-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-xs font-bold text-rose-400 transition"
+              disabled={canceling}
+              className="glow-button mt-8 w-full py-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-xs font-bold text-rose-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Cancel Matchmaking Request
+              {canceling && <RotateCw className="w-3.5 h-3.5 animate-spin" />}
+              <span>{canceling ? "Canceling Request..." : "Cancel Matchmaking Request"}</span>
             </button>
           </motion.div>
         ) : (

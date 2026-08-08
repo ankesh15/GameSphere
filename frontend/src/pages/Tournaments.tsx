@@ -14,10 +14,15 @@ import {
   X,
   Award,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Compass
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/auth";
+import { useDialogStore } from "../store/dialog";
+import { validateTournamentForm } from "../utils/validation";
+import EmptyState from "../components/EmptyState";
+import ErrorAlert from "../components/ErrorAlert";
 import {
   getTournaments,
   getTournament,
@@ -35,6 +40,7 @@ import { GAMES_CATALOG } from "../api/games";
 
 export default function TournamentsPage() {
   const { user } = useAuthStore();
+  const { showAlert, showConfirm, showToast } = useDialogStore();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [selectedTourney, setSelectedTourney] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,6 +105,21 @@ export default function TournamentsPage() {
 
   const handleCreateTournament = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side validation using shared validator
+    const validation = validateTournamentForm({
+      name: createForm.name,
+      gameId: createForm.gameId,
+      startAt: createForm.startAt,
+      endAt: createForm.endAt,
+      prizePool: createForm.prizePool
+    });
+
+    if (validation.firstError) {
+      showAlert(validation.firstError, "Validation Error", "error");
+      return;
+    }
+
     try {
       const payload = {
         ...createForm,
@@ -121,8 +142,9 @@ export default function TournamentsPage() {
       const list = await getTournaments();
       setTournaments(list);
       loadTournamentDetails(newT._id);
+      showToast("Tournament created successfully!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to create tournament.");
+      showAlert(err.response?.data?.message || "Failed to create tournament.", "Tournament Error", "error");
     }
   };
 
@@ -133,8 +155,9 @@ export default function TournamentsPage() {
       setSelectedTourney(updated);
       // Update in list
       setTournaments(prev => prev.map(t => t._id === updated._id ? updated : t));
+      showToast("Successfully joined tournament!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to join tournament.");
+      showAlert(err.response?.data?.message || "Failed to join tournament.", "Tournament Error", "error");
     }
   };
 
@@ -145,8 +168,9 @@ export default function TournamentsPage() {
       setSelectedTourney(updated);
       // Update in list
       setTournaments(prev => prev.map(t => t._id === updated._id ? updated : t));
+      showToast("Left tournament.", "info");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to leave tournament.");
+      showAlert(err.response?.data?.message || "Failed to leave tournament.", "Tournament Error", "error");
     }
   };
 
@@ -156,8 +180,9 @@ export default function TournamentsPage() {
       const updated = await generateBracket(selectedTourney._id);
       setSelectedTourney(updated);
       setTournaments(prev => prev.map(t => t._id === updated._id ? updated : t));
+      showToast("Bracket generated successfully!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to generate bracket. Note that participant count must be at least 2.");
+      showAlert(err.response?.data?.message || "Failed to generate bracket. Note that participant count must be at least 2.", "Bracket Error", "error");
     }
   };
 
@@ -182,25 +207,33 @@ export default function TournamentsPage() {
       setSelectedTourney(updated);
       setTournaments(prev => prev.map(t => t._id === updated._id ? updated : t));
       setShowResultModal(null);
+      showToast("Match scores submitted!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to submit match result.");
+      showAlert(err.response?.data?.message || "Failed to submit match result.", "Submission Error", "error");
     }
   };
 
   const handleVerifyWinner = async (matchId: string, winnerId: string) => {
     if (!selectedTourney) return;
-    if (!window.confirm("Verify this result and advance the winner?")) return;
-    try {
-      const updated = await verifyWinner(selectedTourney._id, {
-        matchId,
-        winnerId
-      });
-      setSelectedTourney(updated);
-      setTournaments(prev => prev.map(t => t._id === updated._id ? updated : t));
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to verify winner.");
-    }
+    showConfirm(
+      "Verify this result and advance the winner to the next round?",
+      async () => {
+        try {
+          const updated = await verifyWinner(selectedTourney._id, {
+            matchId,
+            winnerId
+          });
+          setSelectedTourney(updated);
+          setTournaments(prev => prev.map(t => t._id === updated._id ? updated : t));
+          showToast("Winner verified and advanced!", "success");
+        } catch (err: any) {
+          showAlert(err.response?.data?.message || "Failed to verify winner.", "Verification Error", "error");
+        }
+      },
+      "Verify Match Result"
+    );
   };
+
 
   // Helper to check participation
   const isParticipant = selectedTourney?.participantIds.some((p: any) => {
@@ -270,9 +303,14 @@ export default function TournamentsPage() {
 
             <div className="space-y-3">
               {tournaments.length === 0 ? (
-                <div className="p-8 text-center border border-slate-900 rounded-2xl bg-slate-900/10 text-slate-500 text-xs font-semibold">
-                  No tournaments scheduled. Start one!
-                </div>
+                <EmptyState
+                  icon={<Trophy className="w-6 h-6 text-brand-400" />}
+                  title="No Tournaments Scheduled"
+                  description="There are currently no active competitive brackets. Be the first host to create one!"
+                  actionLabel="Host Tournament"
+                  onAction={() => setShowCreateModal(true)}
+                  actionIcon={<Plus className="w-3.5 h-3.5" />}
+                />
               ) : (
                 tournaments.map((t) => {
                   const active = selectedTourney?._id === t._id;
@@ -402,10 +440,22 @@ export default function TournamentsPage() {
                   </div>
 
                   {selectedTourney.bracket && selectedTourney.bracket.length > 0 ? (
-                    <div className="glass-panel rounded-3xl p-6 overflow-x-auto relative">
+                    <div className="glass-panel rounded-3xl p-4 sm:p-6 overflow-x-auto relative group">
                       <div className="absolute top-0 right-0 w-36 h-36 bg-brand-500/5 rounded-full blur-2xl pointer-events-none" />
 
-                      <div className="flex gap-8 min-w-[700px] py-4 relative">
+                      {/* Mobile Scroll Indicator Banner */}
+                      <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl bg-brand-500/10 border border-brand-500/20 text-[10px] font-bold text-brand-300">
+                        <span className="flex items-center gap-1.5">
+                          <Compass className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: "6s" }} />
+                          Scroll horizontally to view full bracket
+                        </span>
+                        <span className="text-[12px] font-mono">→</span>
+                      </div>
+
+                      {/* Edge gradient hint indicating horizontal scroll */}
+                      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-950/90 to-transparent rounded-r-3xl z-10 sm:hidden" />
+
+                      <div className="flex gap-8 min-w-[700px] py-2 sm:py-4 relative">
                         {selectedTourney.bracket.map((round) => (
                           <div
                             key={round.round}
@@ -499,16 +549,26 @@ export default function TournamentsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-8 text-center border border-slate-900 rounded-3xl bg-slate-900/10 text-slate-500 text-xs font-semibold">
-                      Bracket is not generated yet.
-                    </div>
+                    <EmptyState
+                      icon={<Award className="w-7 h-7 text-slate-600" />}
+                      title="Bracket Not Generated"
+                      description={
+                        isOrganizer
+                          ? "As tournament organizer, click 'Generate Bracket' above once participants have checked in."
+                          : "Bracket details will be published once the tournament organizer initiates match pairings."
+                      }
+                      actionLabel={isOrganizer ? "Generate Bracket" : undefined}
+                      onAction={isOrganizer ? handleGenerateBracket : undefined}
+                    />
                   )}
                 </div>
               </div>
             ) : (
-              <div className="p-12 text-center border border-slate-900 rounded-3xl bg-slate-900/10 text-slate-500 text-xs font-semibold">
-                Select a tournament to view details.
-              </div>
+              <EmptyState
+                icon={<Trophy className="w-8 h-8 text-slate-700" />}
+                title="Select a Tournament"
+                description="Choose an active tournament from the directory panel to view brackets, participant rosters, and live telemetry."
+              />
             )}
           </div>
         </div>

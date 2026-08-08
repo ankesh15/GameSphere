@@ -319,6 +319,42 @@ describe("Tournament Retrieve Gaps & Core Logic", () => {
       expect(mockTournament.status).toBe("completed");
       expect(mockTournament.winnerId).toEqual(p1);
       expect(mockProfilesService.awardBadge).toHaveBeenCalledWith(p1.toString(), expect.any(Object));
+      expect(match.badgeAwarded).toBe(true);
+    });
+
+    it("should return badgeAwarded: false and badgeError when awardBadge throws NotFoundException", async () => {
+      const p1 = new Types.ObjectId();
+      const p2 = new Types.ObjectId();
+      const mockTournament = {
+        _id: new Types.ObjectId(),
+        name: "Championship",
+        organizerId: new Types.ObjectId("60b9f7831f2c2534f40f06a1"),
+        participantIds: [p1, p2],
+        bracket: [
+          {
+            round: 1,
+            matches: [{ matchId: "m1", participantIds: [p1, p2], status: "submitted", winnerId: p1 }],
+          },
+        ],
+        save: jest.fn().mockResolvedValue(true),
+        status: "live",
+        winnerId: undefined,
+      };
+      mockTournamentModel.findById.mockImplementation(() => ({
+        then: (resolve: any) => resolve(mockTournament),
+      }));
+
+      mockProfilesService.awardBadge.mockRejectedValueOnce(new NotFoundException("Profile not found."));
+
+      const result = await service.verifyWinner(
+        mockTournament._id.toString(),
+        { sub: "60b9f7831f2c2534f40f06a1", roles: [] },
+        { matchId: "m1", winnerId: p1.toString() }
+      );
+
+      expect(result.status).toBe("verified");
+      expect(result.badgeAwarded).toBe(false);
+      expect(result.badgeError).toContain("Gamer profile not found for winner");
     });
   });
 

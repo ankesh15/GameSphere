@@ -1,33 +1,73 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Swords, Clock, ChevronRight, Users, Gamepad2 } from "lucide-react";
+import { Swords, Clock, ChevronRight, Users, Gamepad2, Sparkles, Inbox } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getMyMatchSessions, MatchSession } from "../../api/matchmaking";
 
-type MatchItem = {
-  id: number;
-  game: string;
-  mode: string;
-  result: "win" | "loss" | "draw";
-  score: string;
-  duration: string;
-  teammates: number;
-  timeAgo: string;
+const gameNameMap: Record<string, string> = {
+  valorant: "Valorant",
+  cs2: "CS2",
+  "apex-legends": "Apex Legends",
+  apex: "Apex Legends",
+  "league-of-legends": "League of Legends",
+  lol: "League of Legends",
+  dota2: "Dota 2",
+  overwatch: "Overwatch 2"
 };
 
-const matchData: MatchItem[] = [
-  { id: 1, game: "Valorant", mode: "Competitive 5v5", result: "win", score: "13 - 8", duration: "42m", teammates: 4, timeAgo: "2h ago" },
-  { id: 2, game: "CS2", mode: "Premier", result: "loss", score: "11 - 13", duration: "38m", teammates: 4, timeAgo: "5h ago" },
-  { id: 3, game: "Apex Legends", mode: "Trios Ranked", result: "win", score: "#1 / 20", duration: "24m", teammates: 2, timeAgo: "8h ago" },
-  { id: 4, game: "Valorant", mode: "Competitive 5v5", result: "win", score: "13 - 5", duration: "30m", teammates: 4, timeAgo: "1d ago" },
-  { id: 5, game: "League of Legends", mode: "Ranked Solo", result: "loss", score: "22 - 35", duration: "34m", teammates: 4, timeAgo: "1d ago" }
-];
+function formatGameName(gameId: string): string {
+  const lower = gameId.toLowerCase();
+  if (gameNameMap[lower]) return gameNameMap[lower];
+  return gameId
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
-const resultConfig = {
-  win: { label: "Victory", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-  loss: { label: "Defeat", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
-  draw: { label: "Draw", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20" }
+function getTimeAgo(dateStr?: string): string {
+  if (!dateStr) return "Recently";
+  const now = new Date();
+  const past = new Date(dateStr);
+  const diffMs = now.getTime() - past.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+const statusConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  completed: { label: "Victory", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+  active: { label: "Live", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+  pending: { label: "Pending", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+  declined: { label: "Declined", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+  cancelled: { label: "Cancelled", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20" },
+  expired: { label: "Expired", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20" }
 };
 
 export default function MatchHistory() {
+  const [sessions, setSessions] = useState<MatchSession[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      const data = await getMyMatchSessions();
+      setSessions(data);
+    } catch (err) {
+      console.error("Failed to load match history", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -44,62 +84,79 @@ export default function MatchHistory() {
           to="/app/find-teammates"
           className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-400 hover:text-brand-300 transition-colors"
         >
-          View all <ChevronRight className="h-3 w-3" />
+          Matchmaking <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
 
-      <div className="px-4 pb-4 space-y-1.5">
-        {matchData.map((match, index) => {
-          const r = resultConfig[match.result];
-          return (
-            <motion.div
-              key={match.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.55 + index * 0.06 }}
-              className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-slate-800/30 cursor-default"
-            >
-              {/* Game icon */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800/60 border border-slate-700/30">
-                <Gamepad2 className="h-4.5 w-4.5 text-slate-400 group-hover:text-brand-400 transition-colors" />
-              </div>
+      <div className="px-4 pb-4 space-y-1.5 min-h-[160px]">
+        {loading ? (
+          <div className="flex flex-col gap-2 justify-center items-center py-10 text-slate-500 text-xs">
+            <Sparkles className="w-5 h-5 animate-pulse text-brand-400" />
+            <span className="font-mono text-[10px]">Loading match sessions...</span>
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-slate-500 space-y-2">
+            <Inbox className="w-8 h-8 text-slate-700" />
+            <p className="text-xs">No match sessions found. Join queue to start a match!</p>
+          </div>
+        ) : (
+          sessions.map((match, index) => {
+            const conf = statusConfig[match.status] || statusConfig.completed;
+            const gameName = formatGameName(match.gameId);
+            const modeName = match.region ? `${match.region.toUpperCase()} Ranked` : "Ranked Session";
+            const timeAgo = getTimeAgo(match.endedAt || match.startedAt);
+            const teammateCount = Math.max(1, match.playerIds.length - 1);
 
-              {/* Match info */}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white truncate">{match.game}</span>
-                  <span className="text-[10px] text-slate-500">{match.mode}</span>
+            return (
+              <motion.div
+                key={match._id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + index * 0.05 }}
+                className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-slate-800/30 cursor-default"
+              >
+                {/* Game icon */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800/60 border border-slate-700/30">
+                  <Gamepad2 className="h-4.5 w-4.5 text-slate-400 group-hover:text-brand-400 transition-colors" />
                 </div>
-                <div className="mt-0.5 flex items-center gap-3 text-[10px] text-slate-500">
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {match.duration}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    {match.teammates} teammates
-                  </span>
+
+                {/* Match info */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-white truncate">{gameName}</span>
+                    <span className="text-[10px] text-slate-500">{modeName}</span>
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-3 text-[10px] text-slate-500">
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Session
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {teammateCount} teammate{teammateCount > 1 ? "s" : ""}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Score */}
-              <div className="hidden sm:flex items-center gap-2">
-                <Swords className="h-3.5 w-3.5 text-slate-600" />
-                <span className="text-xs font-bold text-white">{match.score}</span>
-              </div>
+                {/* Score / ID info */}
+                <div className="hidden sm:flex items-center gap-2">
+                  <Swords className="h-3.5 w-3.5 text-slate-600" />
+                  <span className="text-[11px] font-mono text-slate-400">#{match._id.slice(-6)}</span>
+                </div>
 
-              {/* Result badge */}
-              <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${r.color} ${r.bg} ${r.border}`}>
-                {r.label}
-              </span>
+                {/* Result badge */}
+                <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${conf.color} ${conf.bg} ${conf.border}`}>
+                  {conf.label}
+                </span>
 
-              {/* Time */}
-              <span className="hidden sm:block shrink-0 text-[10px] font-medium text-slate-600 w-12 text-right">
-                {match.timeAgo}
-              </span>
-            </motion.div>
-          );
-        })}
+                {/* Time */}
+                <span className="hidden sm:block shrink-0 text-[10px] font-medium text-slate-600 w-14 text-right">
+                  {timeAgo}
+                </span>
+              </motion.div>
+            );
+          })
+        )}
       </div>
     </motion.section>
   );

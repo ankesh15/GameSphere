@@ -4,6 +4,7 @@ import { getMatchSession, MatchSession, completeMatchSession } from "../api/matc
 import { getGamerProfile, GamerProfile } from "../api/profiles";
 import { GAMES_CATALOG } from "../api/games";
 import ChatRoom from "../components/ChatRoom";
+import { useDialogStore } from "../store/dialog";
 import {
   Users,
   Compass,
@@ -14,18 +15,21 @@ import {
   TrendingUp,
   Award,
   Link2,
-  Lock
+  Lock,
+  Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function MatchSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const { showAlert, showConfirm, showToast } = useDialogStore();
 
   const [session, setSession] = useState<MatchSession | null>(null);
   const [players, setPlayers] = useState<GamerProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
     if (sessionId) {
@@ -40,10 +44,38 @@ export default function MatchSessionPage() {
       const sess = await getMatchSession(sid);
       setSession(sess);
 
-      // Fetch player profiles
+      // Resilient fetch for player profiles using Promise.allSettled
       const profilePromises = sess.playerIds.map((pid) => getGamerProfile(pid));
-      const profiles = await Promise.all(profilePromises);
-      setPlayers(profiles);
+      const results = await Promise.allSettled(profilePromises);
+
+      const resolvedProfiles: GamerProfile[] = results.map((res, index) => {
+        const pid = sess.playerIds[index];
+        if (res.status === "fulfilled") {
+          return res.value;
+        }
+        // Fallback placeholder profile for failed fetches
+        return {
+          userId: pid,
+          gamerTag: `Player_${pid.slice(-4)}`,
+          displayName: "Unknown Gamer",
+          region: sess.region || "global",
+          skillLevel: "intermediate",
+          favoriteGames: [],
+          platforms: [],
+          availability: [],
+          gamingAccounts: [],
+          playstyle: {
+            competitiveStyle: "semi-pro",
+            communicationStyle: "voice-chat",
+            preferredRoles: []
+          },
+          privacy: { isPublic: true, showOnlineStatus: true, showMatchHistory: true },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      });
+
+      setPlayers(resolvedProfiles);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load match session details.");
     } finally {
@@ -53,14 +85,26 @@ export default function MatchSessionPage() {
 
   const handleCompleteSession = async () => {
     if (!sessionId) return;
-    if (window.confirm("Do you want to complete this match session?")) {
-      try {
-        await completeMatchSession(sessionId);
-      } catch (err: any) {
-        console.error("Failed to complete match session on backend", err);
-      }
-      navigate("/app/find-teammates");
-    }
+    showConfirm(
+      "Do you want to complete this match session? This will close the lobby for all players.",
+      async () => {
+        setCompleting(true);
+        try {
+          await completeMatchSession(sessionId);
+          showToast("Match session completed successfully!", "success");
+          navigate("/app/find-teammates");
+        } catch (err: any) {
+          showAlert(
+            err.response?.data?.message || "Failed to complete match session on backend.",
+            "Session Completion Failed",
+            "error"
+          );
+        } finally {
+          setCompleting(false);
+        }
+      },
+      "Complete Session"
+    );
   };
 
   if (loading) {
@@ -123,9 +167,11 @@ export default function MatchSessionPage() {
         <div>
           <button
             onClick={handleCompleteSession}
-            className="px-5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-350 hover:text-white transition duration-200"
+            disabled={completing}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-350 hover:text-white transition duration-200 disabled:opacity-50"
           >
-            Complete Session
+            {completing && <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-400" />}
+            <span>{completing ? "Completing..." : "Complete Session"}</span>
           </button>
         </div>
       </div>

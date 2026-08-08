@@ -196,6 +196,9 @@ export class TournamentService {
 
     this.advanceWinner(tournament, matchInfo.roundIndex, matchInfo.matchIndex);
 
+    let badgeAwarded = false;
+    let badgeError: string | undefined;
+
     const winnerId = this.resolveTournamentWinner(tournament);
     if (winnerId) {
       tournament.winnerId = winnerId;
@@ -206,8 +209,16 @@ export class TournamentService {
           label: "Tournament Winner",
           source: `tournament:${tournament._id.toString()}`
         });
+        badgeAwarded = true;
       } catch (error) {
-        this.logger.warn("Failed to award tournament badge.");
+        badgeAwarded = false;
+        badgeError =
+          error instanceof NotFoundException
+            ? "Gamer profile not found for winner; tournament badge could not be awarded."
+            : error instanceof Error
+            ? error.message
+            : "Failed to award tournament badge.";
+        this.logger.warn(`Failed to award tournament badge: ${badgeError}`);
       }
 
       // Notify winner
@@ -240,7 +251,11 @@ export class TournamentService {
     }
 
     await tournament.save();
-    return match;
+    return {
+      ...(typeof (match as any).toObject === "function" ? (match as any).toObject() : match),
+      badgeAwarded,
+      ...(badgeError ? { badgeError } : {})
+    };
   }
 
   private buildBracket(participants: Types.ObjectId[]) {

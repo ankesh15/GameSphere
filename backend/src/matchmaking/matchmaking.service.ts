@@ -237,9 +237,19 @@ export class MatchmakingService implements OnModuleInit {
     return session;
   }
 
-  async getMyMatchSessions(userId: string): Promise<MatchSessionDocument[]> {
+  async getMyMatchSessions(userId: string, status?: string): Promise<MatchSessionDocument[]> {
+    const userObjId = Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : userId;
+    const filter: Record<string, any> = {
+      $or: [
+        { playerIds: userObjId },
+        { playerIds: userId }
+      ]
+    };
+    if (status) {
+      filter.status = status;
+    }
     return this.sessionModel
-      .find({ playerIds: new Types.ObjectId(userId) })
+      .find(filter)
       .sort({ createdAt: -1 })
       .limit(20);
   }

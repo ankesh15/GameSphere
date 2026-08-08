@@ -431,4 +431,45 @@ describe("Matchmaking & Realtime Gaps", () => {
       ).rejects.toThrow(WsException);
     });
   });
+
+  describe("Service & Controller - getMyMatchSessions (GAP A)", () => {
+    it("should return sessions for authenticated user from controller", async () => {
+      const mockSessions = [
+        { _id: new Types.ObjectId(), gameId: "valorant", status: "completed" }
+      ];
+      jest.spyOn(service, "getMyMatchSessions").mockResolvedValue(mockSessions as any);
+
+      const result = await controller.getMyMatchSessions(
+        { sub: "user-123", email: "test@example.com", roles: [] },
+        "completed"
+      );
+
+      expect(service.getMyMatchSessions).toHaveBeenCalledWith("user-123", "completed");
+      expect(result).toBe(mockSessions);
+    });
+
+    it("should query sessionModel with user playerIds and optional status filter in service", async () => {
+      const userId = new Types.ObjectId("60b9f7831f2c2534f40f06a1");
+      const mockSessions = [
+        { _id: new Types.ObjectId(), gameId: "valorant", status: "completed" }
+      ];
+
+      mockSessionModel.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValue(mockSessions)
+        })
+      });
+
+      const resCompleted = await service.getMyMatchSessions(userId.toString(), "completed");
+      expect(mockSessionModel.find).toHaveBeenCalledWith({
+        $or: [
+          { playerIds: userId },
+          { playerIds: userId.toString() }
+        ],
+        status: "completed"
+      });
+      expect(resCompleted).toBe(mockSessions);
+    });
+  });
 });
+

@@ -19,6 +19,10 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/auth";
+import { useDialogStore } from "../store/dialog";
+import { validateClanForm } from "../utils/validation";
+import EmptyState from "../components/EmptyState";
+import ErrorAlert from "../components/ErrorAlert";
 import {
   getClans,
   getClan,
@@ -38,6 +42,7 @@ import { GAMES_CATALOG } from "../api/games";
 
 export default function ClansPage() {
   const { user } = useAuthStore();
+  const { showAlert, showConfirm, showToast } = useDialogStore();
   const [clans, setClans] = useState<Clan[]>([]);
   const [selectedClan, setSelectedClan] = useState<Clan | null>(null);
   const [selectedChannel, setSelectedChannel] = useState("general");
@@ -72,6 +77,7 @@ export default function ClansPage() {
   });
 
   const [inviteUserId, setInviteUserId] = useState("");
+  const [showMobileRoster, setShowMobileRoster] = useState(false);
 
   const channels = [
     { id: "announcements", label: "announcements", icon: Megaphone },
@@ -138,6 +144,19 @@ export default function ClansPage() {
 
   const handleCreateClan = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side validation using shared validator
+    const validation = validateClanForm({
+      name: createForm.name,
+      tag: createForm.tag,
+      description: createForm.description
+    });
+
+    if (validation.firstError) {
+      showAlert(validation.firstError, "Validation Error", "error");
+      return;
+    }
+
     try {
       const newClan = await createClan(createForm);
       setShowCreateModal(false);
@@ -154,8 +173,9 @@ export default function ClansPage() {
       const list = await getClans();
       setClans(list);
       setSelectedClan(newClan);
+      showToast("Clan created successfully!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to create clan.");
+      showAlert(err.response?.data?.message || "Failed to create clan.", "Clan Creation Error", "error");
     }
   };
 
@@ -165,33 +185,46 @@ export default function ClansPage() {
       const updated = await joinClan(selectedClan._id);
       setSelectedClan(updated);
       setClans((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+      showToast(`Joined ${updated.name}!`, "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to join clan.");
+      showAlert(err.response?.data?.message || "Failed to join clan.", "Clan Error", "error");
     }
   };
 
   const handleLeaveClan = async () => {
     if (!selectedClan) return;
-    if (!window.confirm("Are you sure you want to leave this clan?")) return;
-    try {
-      const updated = await leaveClan(selectedClan._id);
-      setSelectedClan(updated);
-      setClans((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to leave clan.");
-    }
+    showConfirm(
+      `Are you sure you want to leave ${selectedClan.name}?`,
+      async () => {
+        try {
+          const updated = await leaveClan(selectedClan._id);
+          setSelectedClan(updated);
+          setClans((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showToast(`Left ${selectedClan.name}`, "info");
+        } catch (err: any) {
+          showAlert(err.response?.data?.message || "Failed to leave clan.", "Clan Error", "error");
+        }
+      },
+      "Leave Clan"
+    );
   };
 
   const handleKickMember = async (targetUserId: string) => {
     if (!selectedClan) return;
-    if (!window.confirm("Kick this member from the clan?")) return;
-    try {
-      const updated = await kickMember(selectedClan._id, targetUserId);
-      setSelectedClan(updated);
-      setClans((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to kick member.");
-    }
+    showConfirm(
+      "Are you sure you want to kick this member from the clan?",
+      async () => {
+        try {
+          const updated = await kickMember(selectedClan._id, targetUserId);
+          setSelectedClan(updated);
+          setClans((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+          showToast("Member kicked from clan.", "info");
+        } catch (err: any) {
+          showAlert(err.response?.data?.message || "Failed to kick member.", "Action Failed", "error");
+        }
+      },
+      "Kick Member"
+    );
   };
 
   const handleRoleUpdate = async (targetUserId: string, newRole: "admin" | "moderator" | "member") => {
@@ -203,8 +236,9 @@ export default function ClansPage() {
       });
       setSelectedClan(updated);
       setClans((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+      showToast(`Member role updated to ${newRole}`, "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to update role.");
+      showAlert(err.response?.data?.message || "Failed to update role.", "Role Update Failed", "error");
     }
   };
 
@@ -221,8 +255,9 @@ export default function ClansPage() {
       setShowEventModal(false);
       setEventForm({ title: "", description: "", startsAt: "", endsAt: "" });
       fetchClanEventsList(selectedClan._id);
+      showToast("Clan event scheduled!", "success");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to create clan event.");
+      showAlert(err.response?.data?.message || "Failed to create clan event.", "Event Error", "error");
     }
   };
 
@@ -238,7 +273,7 @@ export default function ClansPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-12rem)] flex bg-slate-950/40 border border-slate-900 rounded-3xl overflow-hidden backdrop-blur-md relative">
+    <div className="min-h-[550px] h-[calc(100vh-8rem)] md:h-[calc(100vh-10rem)] max-h-[900px] flex bg-slate-950/40 border border-slate-900 rounded-3xl overflow-hidden backdrop-blur-md relative">
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 rounded-full border-4 border-brand-500/20 border-t-brand-500 animate-spin" />
@@ -281,14 +316,23 @@ export default function ClansPage() {
           {selectedClan ? (
             <>
               {/* Channel List Panel */}
-              <div className="w-56 bg-slate-955/60 border-r border-slate-900 flex flex-col justify-between shrink-0">
+              <div className="w-44 sm:w-56 bg-slate-955/60 border-r border-slate-900 flex flex-col justify-between shrink-0">
                 <div>
                   {/* Server Title Header */}
-                  <div className="px-4 py-4 border-b border-slate-900/60 flex items-center justify-between">
+                  <div className="px-3 sm:px-4 py-4 border-b border-slate-900/60 flex items-center justify-between">
                     <span className="text-xs font-black text-white uppercase tracking-wider truncate">
                       {selectedClan.name}
                     </span>
-                    <Shield className="w-3.5 h-3.5 text-brand-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => setShowMobileRoster(true)}
+                        className="lg:hidden p-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+                        title="View Roster & Events"
+                      >
+                        <Users className="w-3.5 h-3.5 text-brand-400" />
+                      </button>
+                      <Shield className="w-3.5 h-3.5 text-brand-400 hidden sm:block" />
+                    </div>
                   </div>
 
                   {/* Text Channels List */}
@@ -502,9 +546,9 @@ export default function ClansPage() {
                   ) : (
                     <div className="space-y-3.5">
                       {clanEvents.length === 0 ? (
-                        <span className="text-[9px] text-slate-550 block italic">
-                          No upcoming events.
-                        </span>
+                        <div className="py-4 text-center">
+                          <p className="text-[10px] text-slate-500 font-medium">No upcoming clan events.</p>
+                        </div>
                       ) : (
                         clanEvents.map((evt) => (
                           <div key={evt._id} className="p-2.5 rounded-xl border border-slate-900 bg-slate-950/40">
@@ -528,20 +572,15 @@ export default function ClansPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              <Shield className="w-12 h-12 text-slate-800 mb-4" />
-              <h3 className="text-base font-black text-white uppercase tracking-wider">
-                Welcome to Clans Space
-              </h3>
-              <p className="mt-2 text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-                Clans are communities where you can match up, organize scrims, and schedule tournaments. Create one to begin!
-              </p>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="mt-6 glow-button px-6 py-2.5 rounded-xl bg-brand-600 text-xs font-bold text-white hover:bg-brand-500 transition"
-              >
-                Create a Clan
-              </button>
+            <div className="flex-1 flex items-center justify-center p-6">
+              <EmptyState
+                icon={<Shield className="w-8 h-8 text-brand-400" />}
+                title="Welcome to Clans Hub"
+                description="Clans are player guilds where you can match up, organize scrims, and coordinate tournament squads. Select a clan or create your own!"
+                actionLabel="Create Clan Guild"
+                onAction={() => setShowCreateModal(true)}
+                actionIcon={<Plus className="w-3.5 h-3.5" />}
+              />
             </div>
           )}
         </>
@@ -781,6 +820,153 @@ export default function ClansPage() {
                   Schedule Event
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MOBILE ROSTER & EVENTS DRAWER */}
+      <AnimatePresence>
+        {showMobileRoster && selectedClan && (
+          <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/80 backdrop-blur-sm lg:hidden">
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="w-72 h-full bg-slate-950 border-l border-slate-850 p-5 flex flex-col gap-6 overflow-y-auto relative shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-brand-400" />
+                  <span className="text-xs font-black text-white uppercase tracking-wider">
+                    Roster & Events
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowMobileRoster(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Roster Section */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-1.5 text-slate-500">
+                  <Users className="w-3.5 h-3.5 text-brand-400" />
+                  <span className="text-[9px] font-black uppercase tracking-widest">
+                    MEMBERS — {clanMembers.length}
+                  </span>
+                </div>
+
+                {rosterLoading ? (
+                  <div className="w-4 h-4 border-2 border-brand-500/20 border-t-brand-500 animate-spin rounded-full mx-auto" />
+                ) : (
+                  <div className="space-y-3">
+                    {clanMembers.map((member) => {
+                      const role = getMemberRoleLabel(member.userId);
+                      const canManageThisUser =
+                        isManager && role !== "owner" && member.userId !== user?.id;
+
+                      return (
+                        <div key={member.userId} className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-slate-300 text-[10px] shrink-0">
+                              {member.gamerTag.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-[10px] font-bold text-white block truncate">
+                                {member.displayName || member.gamerTag}
+                              </span>
+                              <span className="text-[8px] text-slate-500 block truncate capitalize">
+                                {role}
+                              </span>
+                            </div>
+                          </div>
+
+                          {canManageThisUser ? (
+                            <div className="flex items-center gap-1">
+                              <select
+                                value={role}
+                                onChange={(e) =>
+                                  handleRoleUpdate(
+                                    member.userId,
+                                    e.target.value as "admin" | "moderator" | "member"
+                                  )
+                                }
+                                className="bg-slate-900 border border-slate-800 text-[8px] rounded px-1 py-0.5 text-slate-400 focus:outline-none"
+                              >
+                                <option value="member">Member</option>
+                                <option value="moderator">Mod</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                              <button
+                                onClick={() => handleKickMember(member.userId)}
+                                className="text-slate-500 hover:text-red-500 transition"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-emerald-500" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="h-px bg-slate-900" />
+
+              {/* Events Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-slate-500">
+                    <Calendar className="w-3.5 h-3.5 text-brand-400" />
+                    <span className="text-[9px] font-black uppercase tracking-widest">
+                      CLAN EVENTS
+                    </span>
+                  </div>
+                  {isManager && (
+                    <button
+                      onClick={() => setShowEventModal(true)}
+                      className="p-1 rounded bg-slate-900 hover:bg-brand-500 text-slate-400 hover:text-white transition"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                {eventsLoading ? (
+                  <div className="w-4 h-4 border-2 border-brand-500/20 border-t-brand-500 animate-spin rounded-full mx-auto" />
+                ) : (
+                  <div className="space-y-3.5">
+                    {clanEvents.length === 0 ? (
+                      <div className="py-2 text-center">
+                        <p className="text-[10px] text-slate-500 font-medium">No upcoming events.</p>
+                      </div>
+                    ) : (
+                      clanEvents.map((evt) => (
+                        <div key={evt._id} className="p-2.5 rounded-xl border border-slate-900 bg-slate-950/40">
+                          <span className="text-[10px] font-bold text-white block truncate">
+                            {evt.title}
+                          </span>
+                          {evt.description && (
+                            <span className="text-[8px] text-slate-450 block line-clamp-2 mt-0.5">
+                              {evt.description}
+                            </span>
+                          )}
+                          <span className="text-[7px] text-brand-400 block font-semibold mt-1">
+                            {new Date(evt.startsAt).toLocaleString()}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
             </motion.div>
           </div>
         )}
