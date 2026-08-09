@@ -256,20 +256,20 @@ export default function TournamentsPage() {
   const isOrganizer = selectedTourney?.organizerId === user?.id;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-body">
       {/* Page Header */}
-      <div className="rounded-3xl border border-slate-900 bg-slate-900/40 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 backdrop-blur relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-500 to-purple-500"></div>
+      <div className="rounded-3xl glass-level-2 border border-white/10 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 backdrop-blur-2xl relative overflow-hidden shadow-xl font-body">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 via-purple-500 to-amber-500"></div>
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Esports Tournaments</h1>
-          <p className="mt-1 text-xs text-slate-400">
+          <h1 className="text-2xl font-black text-white tracking-tight font-display">Esports Tournaments</h1>
+          <p className="mt-1 text-xs text-slate-300 font-body">
             Join competitive gaming brackets, track live brackets, and claim prize rewards.
           </p>
         </div>
         <div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition duration-200"
+            className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition duration-200 uppercase tracking-wider font-body"
           >
             <Trophy className="w-4 h-4" />
             <span>Create Tournament</span>
@@ -278,30 +278,30 @@ export default function TournamentsPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-[40vh] items-center justify-center">
+        <div className="flex h-[40vh] items-center justify-center font-body">
           <div className="w-8 h-8 rounded-full border-4 border-brand-500/20 border-t-brand-500 animate-spin" />
         </div>
       ) : error ? (
-        <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-8 text-center max-w-md mx-auto my-12">
-          <AlertCircle className="w-8 h-8 text-rose-500 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-rose-400">{error}</p>
+        <div className="rounded-3xl glass-level-2 border border-rose-500/30 bg-rose-950/20 p-8 text-center max-w-md mx-auto my-12 shadow-xl font-body">
+          <AlertCircle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-rose-300 font-body">{error}</p>
           <button
             onClick={fetchTournamentsList}
-            className="mt-6 px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-white hover:bg-slate-850 transition"
+            className="mt-6 px-5 py-2.5 rounded-xl glass-level-1 border border-white/10 text-xs font-bold text-white hover:border-white/20 transition uppercase tracking-wider font-body"
           >
             Retry
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 font-body">
           {/* Left Column: Tournaments list */}
-          <div className="space-y-4 lg:col-span-1">
-            <div className="flex items-center gap-2 text-slate-500 px-1">
-              <Trophy className="w-4.5 h-4.5 text-brand-400" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Tournament Directory</span>
+          <div className="space-y-4 lg:col-span-1 font-body">
+            <div className="flex items-center gap-2 text-slate-300 px-1 font-body">
+              <Trophy className="w-4.5 h-4.5 text-brand-300" />
+              <span className="text-[10px] font-extrabold uppercase tracking-wider font-display">Tournament Directory</span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 font-body">
               {tournaments.length === 0 ? (
                 <EmptyState
                   icon={<Trophy className="w-6 h-6 text-brand-400" />}
@@ -319,41 +319,43 @@ export default function TournamentsPage() {
                     <div
                       key={t._id}
                       onClick={() => loadTournamentDetails(t._id)}
-                      className={`p-4 rounded-2xl border cursor-pointer transition flex flex-col justify-between ${
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between shadow-md font-body ${
                         active
-                          ? "bg-brand-650/10 border-brand-500 text-white shadow-lg shadow-brand-500/5"
-                          : "bg-slate-900/40 border-slate-900 text-slate-400 hover:border-slate-800"
+                          ? "glass-level-2 border-brand-500/50 bg-brand-500/10 text-white shadow-lg shadow-brand-500/5"
+                          : "glass-level-1 border-white/10 text-slate-300 hover:border-white/20"
                       }`}
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <span className="text-[9px] px-2 py-0.5 rounded bg-slate-950 border border-slate-850 font-bold uppercase text-slate-400 tracking-wider">
+                          <span className="text-[9px] px-2 py-0.5 rounded-lg bg-slate-950/70 border border-white/10 font-bold uppercase text-slate-300 tracking-wider font-body">
                             {game?.title || t.gameId}
                           </span>
-                          <h3 className="text-xs font-bold text-white uppercase tracking-wider mt-2">
+                          <h3 className="text-xs font-bold text-white uppercase tracking-wider mt-2 font-body">
                             {t.name}
                           </h3>
                         </div>
                         <span
-                          className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                          className={`text-[8px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 font-body ${
                             t.status === "live"
-                              ? "bg-emerald-500/15 text-emerald-400"
+                              ? "bg-amber-500/15 border border-amber-500/30 text-amber-300"
                               : t.status === "completed"
-                              ? "bg-slate-800 text-slate-500"
-                              : "bg-brand-500/10 text-brand-400"
+                              ? "bg-slate-900/80 border border-white/5 text-slate-400"
+                              : "bg-brand-500/15 border border-brand-500/30 text-brand-300"
                           }`}
                         >
+                          {t.status === "live" && <span className="w-1 h-1 rounded-full bg-amber-400 animate-ping"></span>}
                           {t.status}
                         </span>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-slate-900/50 flex justify-between items-center text-[10px]">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-3.5 h-3.5 text-amber-500" />
-                          <span>${t.prizePool?.toLocaleString() || "0"} Pool</span>
+                      <div className="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-[10px] font-body">
+                        <div className="flex items-center gap-1 font-mono">
+                          <DollarSign className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="text-amber-300 font-bold">${t.prizePool?.toLocaleString() || "0"}</span>
+                          <span className="text-slate-400 text-[9px] font-body">Pool</span>
                         </div>
-                        <div className="flex items-center gap-1 text-slate-450">
-                          <Users className="w-3.5 h-3.5 text-slate-500" />
+                        <div className="flex items-center gap-1 font-mono text-slate-300">
+                          <Users className="w-3.5 h-3.5 text-slate-400" />
                           <span>
                             {t.participantIds.length} / {t.maxParticipants || 16}
                           </span>
@@ -367,40 +369,45 @@ export default function TournamentsPage() {
           </div>
 
           {/* Right Columns: Tournament details & interactive Bracket Visualizer */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4 font-body">
             {detailLoading ? (
-              <div className="flex h-[40vh] items-center justify-center">
+              <div className="flex h-[40vh] items-center justify-center font-body">
                 <div className="w-8 h-8 rounded-full border-4 border-brand-500/20 border-t-brand-500 animate-spin" />
               </div>
             ) : selectedTourney ? (
-              <div className="space-y-6">
+              <div className="space-y-6 font-body">
                 {/* Selected Tourney Header Panel */}
-                <div className="p-6 rounded-3xl border border-slate-900 bg-slate-900/20 space-y-4 relative overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="p-6 rounded-3xl glass-level-2 border border-white/10 space-y-4 relative overflow-hidden font-body shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 font-body">
                     <div>
-                      <h2 className="text-lg font-black text-white uppercase tracking-wider">
+                      <h2 className="text-lg font-black text-white uppercase tracking-wider font-display">
                         {selectedTourney.name}
                       </h2>
-                      <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400">
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-300 font-body">
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-brand-500" />
+                          <MapPin className="w-3.5 h-3.5 text-brand-300" />
                           {selectedTourney.region || "Global"}
                         </span>
                         <span>·</span>
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5 text-brand-500" />
+                        <span className="flex items-center gap-1 font-mono">
+                          <Users className="w-3.5 h-3.5 text-brand-300" />
                           {selectedTourney.participantIds.length} Joined
+                        </span>
+                        <span>·</span>
+                        <span className="flex items-center gap-1 font-mono text-amber-300 font-bold">
+                          <DollarSign className="w-3.5 h-3.5 text-amber-400" />
+                          ${selectedTourney.prizePool?.toLocaleString() || "0"} Prize
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 font-body">
                       {selectedTourney.status === "scheduled" && (
                         <>
                           {isParticipant ? (
                             <button
                               onClick={handleLeaveTournament}
-                              className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 transition"
+                              className="px-4 py-2 rounded-xl glass-level-1 border border-white/10 text-xs font-bold text-slate-300 hover:text-white hover:border-white/20 transition font-body uppercase tracking-wider"
                             >
                               Leave Tournament
                             </button>
@@ -408,7 +415,7 @@ export default function TournamentsPage() {
                             <button
                               onClick={handleJoinTournament}
                               disabled={selectedTourney.participantIds.length >= (selectedTourney.maxParticipants || 16)}
-                              className="glow-button px-5 py-2.5 rounded-xl bg-brand-600 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
+                              className="glow-button px-5 py-2.5 rounded-xl bg-brand-600 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50 font-body uppercase tracking-wider"
                             >
                               Join Tournament
                             </button>
@@ -417,7 +424,7 @@ export default function TournamentsPage() {
                           {isOrganizer && (
                             <button
                               onClick={handleGenerateBracket}
-                              className="px-4 py-2.5 rounded-xl border border-brand-500/30 bg-brand-500/10 text-xs font-bold text-brand-400 hover:bg-brand-500 hover:text-white transition"
+                              className="px-4 py-2.5 rounded-xl border border-brand-500/40 bg-brand-500/15 text-xs font-bold text-brand-300 hover:bg-brand-500 hover:text-white transition font-body uppercase tracking-wider"
                             >
                               Generate Bracket
                             </button>
@@ -429,24 +436,24 @@ export default function TournamentsPage() {
                 </div>
 
                 {/* Bracket Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <TrendingUp className="w-4.5 h-4.5 text-brand-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">
+                <div className="space-y-4 font-body">
+                  <div className="flex items-center justify-between px-1 font-body">
+                    <div className="flex items-center gap-2 text-slate-300 font-body">
+                      <TrendingUp className="w-4.5 h-4.5 text-brand-300" />
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider font-display">
                         {selectedTourney.status === "live" ? "Live Bracket Visualization" : "Bracket Preview"}
                       </span>
                     </div>
                   </div>
 
                   {selectedTourney.bracket && selectedTourney.bracket.length > 0 ? (
-                    <div className="glass-panel rounded-3xl p-4 sm:p-6 overflow-x-auto relative group">
-                      <div className="absolute top-0 right-0 w-36 h-36 bg-brand-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div className="glass-level-2 rounded-3xl p-4 sm:p-6 border border-white/10 overflow-x-auto relative group shadow-2xl font-body">
+                      <div className="absolute top-0 right-0 w-36 h-36 bg-brand-500/10 rounded-full blur-2xl pointer-events-none" />
 
                       {/* Mobile Scroll Indicator Banner */}
-                      <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl bg-brand-500/10 border border-brand-500/20 text-[10px] font-bold text-brand-300">
+                      <div className="sm:hidden flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl glass-level-1 border border-brand-500/30 bg-brand-500/10 text-[10px] font-bold text-brand-300 font-body">
                         <span className="flex items-center gap-1.5">
-                          <Compass className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: "6s" }} />
+                          <Compass className="w-3.5 h-3.5 animate-spin text-brand-300" style={{ animationDuration: "6s" }} />
                           Scroll horizontally to view full bracket
                         </span>
                         <span className="text-[12px] font-mono">→</span>
@@ -455,13 +462,13 @@ export default function TournamentsPage() {
                       {/* Edge gradient hint indicating horizontal scroll */}
                       <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-950/90 to-transparent rounded-r-3xl z-10 sm:hidden" />
 
-                      <div className="flex gap-8 min-w-[700px] py-2 sm:py-4 relative">
+                      <div className="flex gap-8 min-w-[700px] py-2 sm:py-4 relative font-body">
                         {selectedTourney.bracket.map((round) => (
                           <div
                             key={round.round}
                             className="flex-1 flex flex-col justify-around space-y-4"
                           >
-                            <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 text-center mb-2">
+                            <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 text-center mb-2 font-display">
                               Round {round.round}
                             </div>
 
@@ -479,6 +486,7 @@ export default function TournamentsPage() {
                               const scoreA = match.scores?.[0] ?? "-";
                               const scoreB = match.scores?.[1] ?? "-";
 
+                              const isLiveMatch = match.status === "pending" || match.status === "submitted";
                               const isUserParticipantOfMatch = match.participantIds.includes(
                                 user?.id || ""
                               );
@@ -486,34 +494,49 @@ export default function TournamentsPage() {
                               return (
                                 <div
                                   key={match.matchId}
-                                  className="p-3.5 rounded-2xl border border-slate-850 bg-slate-950/80 space-y-2 relative group hover:border-slate-700 transition duration-200"
+                                  className={`p-3.5 rounded-2xl space-y-2 relative group transition duration-200 font-body shadow-md ${
+                                    isLiveMatch
+                                      ? "glass-level-2 border-l-4 border-l-amber-500 border border-amber-500/30 bg-slate-950/90 shadow-amber-500/10"
+                                      : match.status === "bye"
+                                      ? "glass-level-1 border border-white/5 bg-slate-950/40 text-slate-500"
+                                      : "glass-level-1 border border-white/10 bg-slate-950/70 hover:border-white/20"
+                                  }`}
                                 >
+                                  {isLiveMatch && (
+                                    <div className="flex items-center justify-between text-[8px] font-extrabold uppercase tracking-wider text-amber-400 mb-1">
+                                      <span className="flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                                        Live Match
+                                      </span>
+                                    </div>
+                                  )}
+
                                   {/* Team A */}
                                   <div className="flex justify-between items-center">
                                     <span
                                       className={`text-[11px] font-bold ${
-                                        isAWinner ? "text-brand-400 font-extrabold" : "text-slate-400"
+                                        isAWinner ? "text-brand-300 font-extrabold" : "text-slate-300"
                                       }`}
                                     >
                                       {teamA}
                                     </span>
-                                    <span className="font-mono text-[10px] text-white font-bold bg-slate-900/60 border border-slate-850 px-1.5 py-0.5 rounded">
+                                    <span className="font-mono text-[10px] text-white font-bold bg-slate-950/80 border border-white/10 px-2 py-0.5 rounded-md">
                                       {scoreA}
                                     </span>
                                   </div>
 
-                                  <div className="h-px bg-slate-900/60" />
+                                  <div className="h-px bg-white/10" />
 
                                   {/* Team B */}
                                   <div className="flex justify-between items-center">
                                     <span
                                       className={`text-[11px] font-bold ${
-                                        isBWinner ? "text-brand-400 font-extrabold" : "text-slate-400"
+                                        isBWinner ? "text-brand-300 font-extrabold" : "text-slate-300"
                                       }`}
                                     >
                                       {teamB}
                                     </span>
-                                    <span className="font-mono text-[10px] text-white font-bold bg-slate-900/60 border border-slate-850 px-1.5 py-0.5 rounded">
+                                    <span className="font-mono text-[10px] text-white font-bold bg-slate-950/80 border border-white/10 px-2 py-0.5 rounded-md">
                                       {scoreB}
                                     </span>
                                   </div>
@@ -524,7 +547,7 @@ export default function TournamentsPage() {
                                       {match.status === "pending" && (isUserParticipantOfMatch || isOrganizer) && (
                                         <button
                                           onClick={() => openResultModal(match)}
-                                          className="text-[9px] font-bold px-2 py-1 rounded bg-brand-500/20 text-brand-400 hover:bg-brand-500 hover:text-white transition"
+                                          className="text-[9px] font-bold px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-white border border-amber-500/30 transition uppercase font-body"
                                         >
                                           Report Result
                                         </button>
@@ -534,7 +557,7 @@ export default function TournamentsPage() {
                                           onClick={() =>
                                             handleVerifyWinner(match.matchId, match.winnerId || "")
                                           }
-                                          className="text-[9px] font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition"
+                                          className="text-[9px] font-bold px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-white border border-emerald-500/30 transition uppercase font-body"
                                         >
                                           Verify Winner
                                         </button>
@@ -550,7 +573,7 @@ export default function TournamentsPage() {
                     </div>
                   ) : (
                     <EmptyState
-                      icon={<Award className="w-7 h-7 text-slate-600" />}
+                      icon={<Award className="w-7 h-7 text-slate-500" />}
                       title="Bracket Not Generated"
                       description={
                         isOrganizer
@@ -565,7 +588,7 @@ export default function TournamentsPage() {
               </div>
             ) : (
               <EmptyState
-                icon={<Trophy className="w-8 h-8 text-slate-700" />}
+                icon={<Trophy className="w-8 h-8 text-slate-600" />}
                 title="Select a Tournament"
                 description="Choose an active tournament from the directory panel to view brackets, participant rosters, and live telemetry."
               />
@@ -577,29 +600,29 @@ export default function TournamentsPage() {
       {/* CREATE TOURNAMENT MODAL */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl font-body">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-lg rounded-3xl border border-slate-900 bg-slate-950 p-6 shadow-2xl relative overflow-hidden"
+              className="w-full max-w-lg rounded-3xl glass-level-3 border border-white/10 bg-slate-950/90 p-6 shadow-2xl relative overflow-hidden font-body"
             >
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-500 to-purple-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 via-purple-500 to-amber-500"></div>
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-base font-black text-white uppercase tracking-wider">
+                <h3 className="text-base font-black text-white uppercase tracking-wider font-display">
                   Create Tournament
                 </h3>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="text-slate-500 hover:text-white transition"
+                  className="text-slate-400 hover:text-white transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateTournament} className="space-y-4">
+              <form onSubmit={handleCreateTournament} className="space-y-4 font-body">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                     Tournament Name
                   </label>
                   <input
@@ -614,19 +637,19 @@ export default function TournamentsPage() {
                       })
                     }
                     placeholder="e.g. Valorant Summer Masters"
-                    className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                       Game
                     </label>
                     <select
                       value={createForm.gameId}
                       onChange={(e) => setCreateForm({ ...createForm, gameId: e.target.value })}
-                      className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                     >
                       {GAMES_CATALOG.map((g) => (
                         <option key={g.gameId} value={g.gameId} className="bg-slate-950">
@@ -637,13 +660,13 @@ export default function TournamentsPage() {
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                       Region
                     </label>
                     <select
                       value={createForm.region}
                       onChange={(e) => setCreateForm({ ...createForm, region: e.target.value })}
-                      className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                     >
                       <option value="NA" className="bg-slate-950">
                         North America (NA)
@@ -663,7 +686,7 @@ export default function TournamentsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                       Max Participants
                     </label>
                     <input
@@ -675,12 +698,12 @@ export default function TournamentsPage() {
                       onChange={(e) =>
                         setCreateForm({ ...createForm, maxParticipants: parseInt(e.target.value) })
                       }
-                      className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                       Prize Pool ($)
                     </label>
                     <input
@@ -691,14 +714,14 @@ export default function TournamentsPage() {
                       onChange={(e) =>
                         setCreateForm({ ...createForm, prizePool: parseInt(e.target.value) })
                       }
-                      className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                       Starts At
                     </label>
                     <input
@@ -706,26 +729,26 @@ export default function TournamentsPage() {
                       required
                       value={createForm.startAt}
                       onChange={(e) => setCreateForm({ ...createForm, startAt: e.target.value })}
-                      className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                       Ends At (Optional)
                     </label>
                     <input
                       type="datetime-local"
                       value={createForm.endAt}
                       onChange={(e) => setCreateForm({ ...createForm, endAt: e.target.value })}
-                      className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full mt-4 glow-button rounded-xl bg-brand-600 py-3 text-xs font-bold text-white hover:bg-brand-500 transition duration-200"
+                  className="w-full mt-4 glow-button rounded-xl bg-brand-600 py-3 text-xs font-bold text-white hover:bg-brand-500 transition duration-200 uppercase tracking-wider font-body"
                 >
                   Create Tournament
                 </button>
@@ -738,30 +761,30 @@ export default function TournamentsPage() {
       {/* REPORT RESULT MODAL */}
       <AnimatePresence>
         {showResultModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl font-body">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm rounded-3xl border border-slate-900 bg-slate-950 p-6 shadow-2xl relative overflow-hidden"
+              className="w-full max-w-sm rounded-3xl glass-level-3 border border-white/10 bg-slate-950/90 p-6 shadow-2xl relative overflow-hidden font-body"
             >
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-500 to-purple-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 via-purple-500 to-amber-500"></div>
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-base font-black text-white uppercase tracking-wider">
+                <h3 className="text-base font-black text-white uppercase tracking-wider font-display">
                   Report Match Scores
                 </h3>
                 <button
                   onClick={() => setShowResultModal(null)}
-                  className="text-slate-500 hover:text-white transition"
+                  className="text-slate-400 hover:text-white transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmitResult} className="space-y-4">
+              <form onSubmit={handleSubmitResult} className="space-y-4 font-body">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1 truncate">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 truncate font-body">
                       {getParticipantName(showResultModal.participantIds[0] || "")} Score
                     </label>
                     <input
@@ -779,12 +802,12 @@ export default function TournamentsPage() {
                               : showResultModal.participantIds[1] || ""
                         })
                       }
-                      className="w-full text-center rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full text-center rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1 truncate">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 truncate font-body">
                       {getParticipantName(showResultModal.participantIds[1] || "")} Score
                     </label>
                     <input
@@ -802,19 +825,19 @@ export default function TournamentsPage() {
                               : showResultModal.participantIds[1] || ""
                         })
                       }
-                      className="w-full text-center rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="w-full text-center rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-450 block mb-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 block mb-1 font-body">
                     Declared Winner
                   </label>
                   <select
                     value={resultForm.winnerId}
                     onChange={(e) => setResultForm({ ...resultForm, winnerId: e.target.value })}
-                    className="w-full rounded-xl border border-slate-850 bg-slate-900/40 px-3 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                   >
                     <option value={showResultModal.participantIds[0]} className="bg-slate-950">
                       {getParticipantName(showResultModal.participantIds[0] || "")}
@@ -829,7 +852,7 @@ export default function TournamentsPage() {
 
                 <button
                   type="submit"
-                  className="w-full mt-4 glow-button rounded-xl bg-brand-600 py-3 text-xs font-bold text-white hover:bg-brand-500 transition duration-200"
+                  className="w-full mt-4 glow-button rounded-xl bg-brand-600 py-3 text-xs font-bold text-white hover:bg-brand-500 transition duration-200 uppercase tracking-wider font-body"
                 >
                   Submit Scores
                 </button>

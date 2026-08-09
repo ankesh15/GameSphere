@@ -135,10 +135,10 @@ export default function GamerProfilePage() {
       const data = await getMyProfile();
       setProfileData(data);
     } catch (err: any) {
-      if (err.response?.status === 404) {
+      if (err.statusCode === 404 || err.response?.status === 404) {
         setOnboarding(true);
       } else {
-        setError(err.response?.data?.message || "Failed to load gamer profile.");
+        setError(err.message || err.response?.data?.message || "Failed to load gamer profile.");
       }
     } finally {
       setLoading(false);
@@ -363,19 +363,23 @@ export default function GamerProfilePage() {
 
   if (!loading && error && !profile && !onboarding) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
-          <AlertCircle className="w-8 h-8 text-rose-500" />
+      <div className="py-16 px-4">
+        <div className="glass-level-2 max-w-md mx-auto p-8 rounded-3xl border border-rose-500/30 text-center shadow-2xl space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-8 h-8 text-rose-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-white tracking-tight font-display">Profile Load Failed</h2>
+            <p className="mt-2 text-xs text-slate-300 font-body leading-relaxed">{error}</p>
+          </div>
+          <button
+            onClick={fetchProfile}
+            className="glow-button inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-bold text-white transition uppercase tracking-wider font-body"
+          >
+            <RotateCw className="w-4 h-4" />
+            Retry Load
+          </button>
         </div>
-        <h2 className="text-xl font-black text-white tracking-tight">Profile Load Failed</h2>
-        <p className="mt-2 text-sm text-slate-400 max-w-md">{error}</p>
-        <button
-          onClick={fetchProfile}
-          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-sm font-bold text-white transition glow-button"
-        >
-          <RotateCw className="w-4 h-4" />
-          Retry
-        </button>
       </div>
     );
   }
@@ -383,20 +387,20 @@ export default function GamerProfilePage() {
   if (onboarding) {
     return (
       <div className="mx-auto max-w-xl space-y-6 pt-10">
-        <div className="glass-panel rounded-3xl p-8 backdrop-blur text-center relative overflow-hidden">
+        <div className="glass-level-2 rounded-3xl p-8 text-center relative overflow-hidden border border-white/10 shadow-2xl">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600"></div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Create Gamer Profile</h1>
-          <p className="mt-3 text-sm text-slate-400">
+          <h1 className="text-3xl font-extrabold text-white tracking-tight font-display">Create Gamer Profile</h1>
+          <p className="mt-3 text-sm text-slate-400 font-body">
             Welcome to GameSphere! Initialize your player tag and server region to start matching.
           </p>
 
           <form onSubmit={handleOnboardingSubmit} className="mt-8 text-left space-y-6">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Gamer Tag (Unique)</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 font-body">Gamer Tag (Unique)</label>
               <input
                 type="text"
                 required
-                className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3.5 text-sm text-white focus:border-brand-500 focus:outline-none"
+                className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3.5 text-sm text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                 placeholder="e.g. Shroud#1337"
                 value={newGamerTag}
                 onChange={(e) => setNewGamerTag(e.target.value)}
@@ -404,9 +408,9 @@ export default function GamerProfilePage() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Default Server Region</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 font-body">Default Server Region</label>
               <select
-                className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3.5 text-sm text-white focus:border-brand-500 focus:outline-none"
+                className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3.5 text-sm text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                 value={newRegion}
                 onChange={(e) => setNewRegion(e.target.value)}
               >
@@ -417,9 +421,9 @@ export default function GamerProfilePage() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Self-Assessed Skill Level</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 font-body">Self-Assessed Skill Level</label>
               <select
-                className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3.5 text-sm text-white focus:border-brand-500 focus:outline-none"
+                className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3.5 text-sm text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                 value={newSkillLevel}
                 onChange={(e) => setNewSkillLevel(e.target.value as any)}
               >
@@ -432,9 +436,10 @@ export default function GamerProfilePage() {
             <button
               type="submit"
               disabled={onboardingSaving}
-              className="glow-button w-full rounded-xl bg-brand-600 py-3.5 text-sm font-bold text-white transition hover:bg-brand-500 disabled:opacity-50"
+              className="glow-button w-full flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-xs font-bold text-white transition hover:bg-brand-500 disabled:opacity-50 font-body uppercase tracking-wider"
             >
-              {onboardingSaving ? "Creating..." : "Initialize Profile"}
+              {onboardingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              <span>{onboardingSaving ? "Creating..." : "Initialize Profile"}</span>
             </button>
           </form>
         </div>
@@ -453,7 +458,7 @@ export default function GamerProfilePage() {
   return (
     <div className="space-y-6">
       {/* High-Fidelity Cover Banner */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/30 overflow-hidden relative backdrop-blur-md">
+      <div className="rounded-3xl border border-white/10 glass-level-2 overflow-hidden relative">
         <div className="h-28 bg-gradient-to-r from-brand-900/60 via-purple-900/30 to-slate-950 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-full bg-brand-500/10 rounded-full blur-[100px]" />
           <div className="absolute top-4 right-4 flex gap-2">
@@ -461,7 +466,7 @@ export default function GamerProfilePage() {
               <span
                 key={badge.code}
                 title={badge.source || "System Awarded"}
-                className="px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-wider"
+                className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-live-400 text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-wider font-body"
               >
                 <Award className="w-3.5 h-3.5" />
                 {badge.label}
@@ -473,18 +478,18 @@ export default function GamerProfilePage() {
         {/* Profile Card Main Info */}
         <div className="px-6 pb-6 pt-3 flex flex-col md:flex-row md:items-end md:justify-between gap-6 relative">
           <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 sm:-mt-14">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center font-black text-white text-3xl border-2 border-slate-950 shadow-2xl relative">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center font-black text-white text-3xl border-2 border-obsidian-950 shadow-2xl relative font-display">
               {profile?.gamerTag.slice(0, 2).toUpperCase()}
-              <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950"></span>
+              <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-obsidian-950"></span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">{profile?.gamerTag}</h1>
-                <span className="rounded bg-brand-500/10 border border-brand-500/20 px-2 py-0.5 text-[9px] font-extrabold text-brand-400 uppercase tracking-widest">
+                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight font-display">{profile?.gamerTag}</h1>
+                <span className="rounded-full bg-brand-500/10 border border-brand-500/30 px-2.5 py-0.5 text-[9px] font-extrabold text-brand-300 uppercase tracking-widest font-body">
                   {profile?.skillLevel || "Intermediate"}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-400 mt-1 font-body">
                 {displayName ? `${displayName} · ` : ""}Region: {REGIONS.find((r) => r.value === region)?.label || region}
               </p>
             </div>
@@ -492,13 +497,13 @@ export default function GamerProfilePage() {
 
           <div className="flex items-center gap-6">
             <div className="text-center sm:text-right">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Profile Level</span>
-              <span className="text-sm font-extrabold text-white mt-0.5 block">Level 12</span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-body">Profile Level</span>
+              <span className="text-sm font-extrabold text-white mt-0.5 block font-mono">Level 12</span>
             </div>
-            <div className="w-px h-8 bg-slate-800" />
+            <div className="w-px h-8 bg-white/10" />
             <div className="text-center sm:text-right">
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Playstyle</span>
-              <span className="text-sm font-extrabold text-brand-400 mt-0.5 block capitalize">
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-body">Playstyle</span>
+              <span className="text-sm font-extrabold text-brand-300 mt-0.5 block capitalize font-body">
                 {profile?.playstyle?.competitiveStyle || "Semi-Pro"}
               </span>
             </div>
@@ -506,30 +511,28 @@ export default function GamerProfilePage() {
         </div>
       </div>
 
-
-
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Navigation Sidebar */}
-        <aside className="lg:col-span-1 space-y-1 bg-slate-900/25 border border-slate-900 rounded-2xl p-2.5 h-fit">
+        <aside className="lg:col-span-1 space-y-1 glass-level-1 border border-white/5 rounded-2xl p-2.5 h-fit">
           {tabItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition relative ${
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition relative font-body ${
                   isActive ? "text-white" : "text-slate-400 hover:text-slate-200"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="profileTabBg"
-                    className="absolute inset-0 bg-slate-900 border border-slate-800 rounded-xl -z-10"
+                    className="absolute inset-0 glass-level-2 border border-brand-500/35 rounded-xl -z-10"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
-                <item.icon className={`w-4 h-4 ${isActive ? "text-brand-400" : "text-slate-400"}`} />
+                <item.icon className={`w-4 h-4 ${isActive ? "text-brand-300" : "text-slate-400"}`} />
                 <span>{item.label}</span>
               </button>
             );
@@ -538,7 +541,7 @@ export default function GamerProfilePage() {
 
         {/* Tab content panel */}
         <section className="lg:col-span-3">
-          <div className="glass-panel rounded-3xl p-6 relative overflow-hidden min-h-[400px]">
+          <div className="glass-level-2 rounded-3xl p-6 relative overflow-hidden min-h-[400px] border border-white/10">
             {activeTab === "details" && (
               <form onSubmit={handleDetailsSubmit} className="space-y-6">
                 <div className="border-b border-slate-800 pb-3">
@@ -546,22 +549,22 @@ export default function GamerProfilePage() {
                   <p className="text-[11px] text-slate-400 mt-1">Update your display information and catalog favorites.</p>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2 font-body">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">Gamer Tag</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Gamer Tag</label>
                     <input
                       type="text"
-                      className="mt-2 w-full rounded-xl border border-slate-850 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                       value={gamerTag}
                       onChange={(e) => setGamerTag(e.target.value)}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">Real Name / Display Name</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Real Name / Display Name</label>
                     <input
                       type="text"
-                      className="mt-2 w-full rounded-xl border border-slate-850 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                       value={displayName}
                       placeholder="e.g. John Doe"
                       onChange={(e) => setDisplayName(e.target.value)}
@@ -569,22 +572,22 @@ export default function GamerProfilePage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">Biography / Status</label>
+                <div className="font-body">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Biography / Status</label>
                   <textarea
                     rows={3}
-                    className="mt-2 w-full rounded-xl border border-slate-855 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none resize-none leading-relaxed"
+                    className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none resize-none leading-relaxed transition-all font-body"
                     value={bio}
                     placeholder="Tell other squads about your playstyle, preferences, or schedules..."
                     onChange={(e) => setBio(e.target.value)}
                   />
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2 font-body">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">Server Region</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Server Region</label>
                     <select
-                      className="mt-2 w-full rounded-xl border border-slate-850 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                       value={region}
                       onChange={(e) => setRegion(e.target.value)}
                     >
@@ -595,9 +598,9 @@ export default function GamerProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">Skill Level Assessment</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Skill Level Assessment</label>
                     <select
-                      className="mt-2 w-full rounded-xl border border-slate-855 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                       value={skillLevel}
                       onChange={(e) => setSkillLevel(e.target.value as any)}
                     >
@@ -609,8 +612,8 @@ export default function GamerProfilePage() {
                 </div>
 
                 {/* Platforms selection */}
-                <div className="space-y-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">Available Platforms</label>
+                <div className="space-y-2 font-body">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Available Platforms</label>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {PLATFORMS.map((plat) => {
                       const selected = platforms.includes(plat);
@@ -619,10 +622,10 @@ export default function GamerProfilePage() {
                           type="button"
                           key={plat}
                           onClick={() => togglePlatform(plat)}
-                          className={`px-3 py-2 rounded-xl text-xs font-semibold border transition ${
+                          className={`px-3 py-2 rounded-xl text-xs font-semibold border transition font-body ${
                             selected
-                              ? "bg-brand-600/10 border-brand-500 text-white"
-                              : "bg-slate-950 border-slate-850 text-slate-400 hover:text-white"
+                              ? "bg-brand-600/20 border-brand-500/40 text-white shadow-md shadow-brand-500/10"
+                              : "glass-level-1 border-white/5 text-slate-400 hover:text-white"
                           }`}
                         >
                           {plat}
@@ -633,8 +636,8 @@ export default function GamerProfilePage() {
                 </div>
 
                 {/* Favorite Games selection */}
-                <div className="space-y-3">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">Game Catalogs Preferred</label>
+                <div className="space-y-3 font-body">
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Game Catalogs Preferred</label>
                   <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 pt-1">
                     {GAMES_CATALOG.map((game) => {
                       const selected = favoriteGames.includes(game.gameId);
@@ -642,13 +645,13 @@ export default function GamerProfilePage() {
                         <div
                           key={game.gameId}
                           onClick={() => toggleFavoriteGame(game.gameId)}
-                          className={`p-3 rounded-xl border cursor-pointer select-none transition flex items-center justify-between ${
+                          className={`p-3 rounded-xl border cursor-pointer select-none transition flex items-center justify-between font-body ${
                             selected
-                              ? "bg-brand-500/10 border-brand-500 text-white"
-                              : "bg-slate-950/60 border-slate-900 text-slate-400 hover:border-slate-800"
+                              ? "bg-brand-500/15 border-brand-500/40 text-white shadow-md"
+                              : "glass-level-1 border-white/5 text-slate-400 hover:border-white/10 hover:text-slate-200"
                           }`}
                         >
-                          <span className="text-xs font-bold">{game.title}</span>
+                          <span className="text-xs font-bold font-body">{game.title}</span>
                           <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] border ${
                             selected ? "bg-brand-600 border-brand-500 text-white" : "border-slate-700"
                           }`}>
@@ -660,11 +663,11 @@ export default function GamerProfilePage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-900 flex justify-end">
+                <div className="pt-4 border-t border-white/10 flex justify-end">
                   <button
                     type="submit"
                     disabled={detailsSaving}
-                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
+                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50 font-body uppercase tracking-wider"
                   >
                     {detailsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     <span>{detailsSaving ? "Saving..." : "Save Identity"}</span>
@@ -675,14 +678,14 @@ export default function GamerProfilePage() {
 
             {activeTab === "playstyle" && (
               <form onSubmit={handlePlaystyleSubmit} className="space-y-6">
-                <div className="border-b border-slate-800 pb-3">
-                  <h3 className="text-base font-bold text-white">Playstyle Settings</h3>
-                  <p className="text-[11px] text-slate-400 mt-1">Specify how you prefer to communicate and play with teams.</p>
+                <div className="border-b border-white/10 pb-3">
+                  <h3 className="text-base font-bold text-white font-display">Playstyle Settings</h3>
+                  <p className="text-[11px] text-slate-400 mt-1 font-body">Specify how you prefer to communicate and play with teams.</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 font-body">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">Competitive Intent</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Competitive Intent</label>
                     <div className="grid gap-3 md:grid-cols-3 mt-2">
                       {COMPETITIVE_STYLES.map((style) => {
                         const active = competitiveStyle === style.value;
@@ -692,12 +695,12 @@ export default function GamerProfilePage() {
                             onClick={() => setCompetitiveStyle(style.value)}
                             className={`p-4 rounded-2xl border cursor-pointer select-none transition ${
                               active
-                                ? "bg-brand-600/10 border-brand-500 text-white shadow-lg shadow-brand-500/5"
-                                : "bg-slate-950 border-slate-850 text-slate-450 hover:border-slate-750"
+                                ? "glass-level-2 border-brand-500/40 bg-brand-500/10 text-white shadow-lg shadow-brand-500/5"
+                                : "glass-level-1 border-white/5 text-slate-400 hover:border-white/15"
                             }`}
                           >
-                            <h4 className="text-xs font-bold">{style.label.split(" - ")[0]}</h4>
-                            <p className="text-[9px] text-slate-500 mt-1">{style.label.split(" - ")[1]}</p>
+                            <h4 className="text-xs font-bold font-body text-white">{style.label.split(" - ")[0]}</h4>
+                            <p className="text-[9px] text-slate-400 mt-1 font-body">{style.label.split(" - ")[1]}</p>
                           </div>
                         );
                       })}
@@ -705,7 +708,7 @@ export default function GamerProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450">Communication Preference</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">Communication Preference</label>
                     <div className="grid gap-3 md:grid-cols-3 mt-2">
                       {COMMUNICATION_STYLES.map((comm) => {
                         const active = communicationStyle === comm.value;
@@ -715,12 +718,12 @@ export default function GamerProfilePage() {
                             onClick={() => setCommunicationStyle(comm.value)}
                             className={`p-4 rounded-2xl border cursor-pointer select-none transition ${
                               active
-                                ? "bg-brand-600/10 border-brand-500 text-white shadow-lg shadow-brand-500/5"
-                                : "bg-slate-950 border-slate-850 text-slate-450 hover:border-slate-750"
+                                ? "glass-level-2 border-brand-500/40 bg-brand-500/10 text-white shadow-lg shadow-brand-500/5"
+                                : "glass-level-1 border-white/5 text-slate-400 hover:border-white/15"
                             }`}
                           >
-                            <h4 className="text-xs font-bold">{comm.label.split(" - ")[0]}</h4>
-                            <p className="text-[9px] text-slate-500 mt-1">{comm.label.split(" - ")[1]}</p>
+                            <h4 className="text-xs font-bold font-body text-white">{comm.label.split(" - ")[0]}</h4>
+                            <p className="text-[9px] text-slate-400 mt-1 font-body">{comm.label.split(" - ")[1]}</p>
                           </div>
                         );
                       })}
@@ -728,11 +731,11 @@ export default function GamerProfilePage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-900 flex justify-end">
+                <div className="pt-4 border-t border-white/10 flex justify-end">
                   <button
                     type="submit"
                     disabled={playstyleSaving}
-                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
+                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50 font-body uppercase tracking-wider"
                   >
                     {playstyleSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     <span>{playstyleSaving ? "Saving..." : "Save Playstyle"}</span>
@@ -743,12 +746,12 @@ export default function GamerProfilePage() {
 
             {activeTab === "schedule" && (
               <form onSubmit={handleAvailabilitySubmit} className="space-y-6">
-                <div className="border-b border-slate-800 pb-3">
-                  <h3 className="text-base font-bold text-white">Weekly Availability</h3>
-                  <p className="text-[11px] text-slate-400 mt-1">Specify which days and hours you are available for matchmaking.</p>
+                <div className="border-b border-white/10 pb-3">
+                  <h3 className="text-base font-bold text-white font-display">Weekly Availability</h3>
+                  <p className="text-[11px] text-slate-400 mt-1 font-body">Specify which days and hours you are available for matchmaking.</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 font-body">
                   {DAYS_OF_WEEK.map((day, idx) => {
                     const dayItem = availability.find((a) => a.dayOfWeek === idx);
                     const active = !!dayItem;
@@ -757,7 +760,7 @@ export default function GamerProfilePage() {
                       <div
                         key={day}
                         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border transition ${
-                          active ? "bg-slate-950 border-slate-800" : "bg-slate-950/20 border-slate-900/60 opacity-60"
+                          active ? "glass-level-2 border-white/10 text-white" : "glass-level-1 border-white/5 opacity-60"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -765,26 +768,26 @@ export default function GamerProfilePage() {
                             type="button"
                             onClick={() => handleDayAvailabilityToggle(idx)}
                             className={`w-5 h-5 rounded-md flex items-center justify-center border transition ${
-                              active ? "bg-brand-600 border-brand-500 text-white" : "border-slate-800"
+                              active ? "bg-brand-600 border-brand-500 text-white" : "border-slate-700"
                             }`}
                           >
                             {active ? "✓" : ""}
                           </button>
-                          <span className="text-xs font-bold text-white">{day}</span>
+                          <span className="text-xs font-bold text-white font-body">{day}</span>
                         </div>
 
                         {active && (
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="flex items-center gap-2 text-xs font-mono">
                             <input
                               type="time"
-                              className="rounded-lg border border-slate-800 bg-slate-900 px-2 py-1.5 text-xs text-white focus:outline-none"
+                              className="rounded-lg border border-white/10 bg-slate-950/80 px-2 py-1.5 text-xs text-white focus:border-brand-500/50 focus:outline-none"
                               value={dayItem.startTime}
                               onChange={(e) => updateDayTimes(idx, e.target.value, dayItem.endTime)}
                             />
-                            <span className="text-slate-500">to</span>
+                            <span className="text-slate-400 font-body">to</span>
                             <input
                               type="time"
-                              className="rounded-lg border border-slate-800 bg-slate-900 px-2 py-1.5 text-xs text-white focus:outline-none"
+                              className="rounded-lg border border-white/10 bg-slate-950/80 px-2 py-1.5 text-xs text-white focus:border-brand-500/50 focus:outline-none"
                               value={dayItem.endTime}
                               onChange={(e) => updateDayTimes(idx, dayItem.startTime, e.target.value)}
                             />
@@ -795,11 +798,11 @@ export default function GamerProfilePage() {
                   })}
                 </div>
 
-                <div className="pt-4 border-t border-slate-900 flex justify-end">
+                <div className="pt-4 border-t border-white/10 flex justify-end">
                   <button
                     type="submit"
                     disabled={availabilitySaving}
-                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
+                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50 font-body uppercase tracking-wider"
                   >
                     {availabilitySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     <span>{availabilitySaving ? "Saving..." : "Save Schedule"}</span>
@@ -810,30 +813,30 @@ export default function GamerProfilePage() {
 
             {activeTab === "accounts" && (
               <div className="space-y-6">
-                <div className="border-b border-slate-800 pb-3">
-                  <h3 className="text-base font-bold text-white">Link Game Clients</h3>
-                  <p className="text-[11px] text-slate-400 mt-1">Connect your verified handles so teammates can find you.</p>
+                <div className="border-b border-white/10 pb-3">
+                  <h3 className="text-base font-bold text-white font-display">Link Game Clients</h3>
+                  <p className="text-[11px] text-slate-400 mt-1 font-body">Connect your verified handles so teammates can find you.</p>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-3 font-body">
                   {(["riot", "steam", "epic"] as const).map((prov) => {
                     const linkedAcc = profile?.gamingAccounts.find((a) => a.provider === prov);
                     return (
                       <div
                         key={prov}
                         className={`p-5 rounded-2xl border flex flex-col justify-between h-40 transition relative overflow-hidden ${
-                          linkedAcc ? "bg-brand-500/5 border-brand-500/20" : "bg-slate-950 border-slate-850"
+                          linkedAcc ? "glass-level-2 border-brand-500/30 bg-brand-500/10" : "glass-level-1 border-white/5"
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{prov}</span>
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-300 font-body">{prov}</span>
                             {linkedAcc ? (
-                              <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/20 font-body">
                                 <CheckCircle className="w-3 h-3" /> Linked
                               </span>
                             ) : (
-                              <span className="text-[9px] font-bold text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="text-[9px] font-bold text-slate-400 bg-slate-900/60 px-2 py-0.5 rounded-full flex items-center gap-1 border border-white/5 font-body">
                                 <XCircle className="w-3 h-3" /> Disconnected
                               </span>
                             )}
@@ -842,11 +845,11 @@ export default function GamerProfilePage() {
                           <div className="mt-4">
                             {linkedAcc ? (
                               <div className="space-y-1">
-                                <span className="text-[9px] text-slate-500 uppercase tracking-widest block">Handle Name</span>
-                                <span className="text-sm font-extrabold text-white truncate block">{linkedAcc.handle}</span>
+                                <span className="text-[9px] text-slate-400 uppercase tracking-widest block font-body">Handle Name</span>
+                                <span className="text-sm font-extrabold text-white truncate block font-body">{linkedAcc.handle}</span>
                               </div>
                             ) : (
-                              <p className="text-[10px] text-slate-500">Provide gaming credential handles to establish connection.</p>
+                              <p className="text-[10px] text-slate-400 font-body">Provide gaming credential handles to establish connection.</p>
                             )}
                           </div>
                         </div>
@@ -855,7 +858,7 @@ export default function GamerProfilePage() {
                           <button
                             onClick={() => handleAccountUnlink(prov)}
                             disabled={unlinkingProvider === prov}
-                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/20 text-rose-400 text-xs font-semibold transition disabled:opacity-50"
+                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold transition disabled:opacity-50 font-body"
                           >
                             {unlinkingProvider === prov ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                             <span>{unlinkingProvider === prov ? "Unlinking..." : "Unlink Handle"}</span>
@@ -863,9 +866,9 @@ export default function GamerProfilePage() {
                         ) : (
                           <button
                             onClick={() => setLinkingProvider(prov)}
-                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 text-xs font-semibold transition"
+                            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl glass-level-1 hover:bg-white/10 border border-white/10 text-slate-200 text-xs font-semibold transition font-body"
                           >
-                            <Plus className="w-3.5 h-3.5 text-brand-400" />
+                            <Plus className="w-3.5 h-3.5 text-brand-300" />
                             <span>Link Handle</span>
                           </button>
                         )}
@@ -881,16 +884,16 @@ export default function GamerProfilePage() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4"
+                      className="p-5 rounded-2xl glass-level-3 border border-white/15 space-y-4 shadow-2xl"
                     >
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider font-display">
                         Verify {linkingProvider} Client Handle
                       </h4>
                       <form onSubmit={handleAccountLink} className="flex flex-col sm:flex-row gap-3">
                         <input
                           type="text"
                           required
-                          className="flex-1 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                          className="flex-1 rounded-xl border border-white/10 bg-slate-950/80 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none font-body"
                           placeholder={`Enter ${linkingProvider} nickname or tag`}
                           value={accountHandle}
                           onChange={(e) => setAccountHandle(e.target.value)}
@@ -898,7 +901,7 @@ export default function GamerProfilePage() {
                         <div className="flex gap-2">
                           <button
                             type="submit"
-                            className="px-4 py-2.5 rounded-xl bg-brand-600 text-xs font-bold text-white hover:bg-brand-500 transition"
+                            className="glow-button px-4 py-2.5 rounded-xl bg-brand-600 text-xs font-bold text-white hover:bg-brand-500 transition font-body uppercase tracking-wider"
                           >
                             Verify Link
                           </button>
@@ -909,13 +912,13 @@ export default function GamerProfilePage() {
                               setAccountHandle("");
                               setLinkError(null);
                             }}
-                            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-400 hover:text-white transition"
+                            className="px-4 py-2.5 rounded-xl glass-level-1 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition font-body"
                           >
                             Cancel
                           </button>
                         </div>
                       </form>
-                      {linkError && <p className="text-[10px] font-semibold text-rose-400">{linkError}</p>}
+                      {linkError && <p className="text-[10px] font-semibold text-rose-400 font-body">{linkError}</p>}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -924,21 +927,21 @@ export default function GamerProfilePage() {
 
             {activeTab === "privacy" && (
               <form onSubmit={handlePrivacySubmit} className="space-y-6">
-                <div className="border-b border-slate-800 pb-3">
-                  <h3 className="text-base font-bold text-white">Privacy Parameters</h3>
-                  <p className="text-[11px] text-slate-400 mt-1">Control your profile's global metadata visibility.</p>
+                <div className="border-b border-white/10 pb-3">
+                  <h3 className="text-base font-bold text-white font-display">Privacy Parameters</h3>
+                  <p className="text-[11px] text-slate-400 mt-1 font-body">Control your profile's global metadata visibility.</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 font-body">
                   {[
                     { label: "Public Profile Indexing", desc: "Allow other users and squads to see your stats, bio, and availability.", state: isPublic, setter: setIsPublic },
                     { label: "Online Activity Tracking", desc: "Broadcast active online indicators inside clans and lobbies.", state: showOnlineStatus, setter: setShowOnlineStatus },
                     { label: "Expose Historical Matches", desc: "Render historical match details inside teammate lists.", state: showMatchHistory, setter: setShowMatchHistory }
                   ].map((priv, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-slate-900 bg-slate-950/40">
+                    <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-white/5 glass-level-1">
                       <div>
-                        <h4 className="text-xs font-bold text-white">{priv.label}</h4>
-                        <p className="text-[9px] text-slate-500 mt-0.5">{priv.desc}</p>
+                        <h4 className="text-xs font-bold text-white font-body">{priv.label}</h4>
+                        <p className="text-[9px] text-slate-400 mt-0.5 font-body">{priv.desc}</p>
                       </div>
                       <button
                         type="button"
@@ -957,11 +960,11 @@ export default function GamerProfilePage() {
                   ))}
                 </div>
 
-                <div className="pt-4 border-t border-slate-900 flex justify-end">
+                <div className="pt-4 border-t border-white/10 flex justify-end">
                   <button
                     type="submit"
                     disabled={privacySaving}
-                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
+                    className="glow-button inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50 font-body uppercase tracking-wider"
                   >
                     {privacySaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     <span>{privacySaving ? "Saving..." : "Save Privacy"}</span>

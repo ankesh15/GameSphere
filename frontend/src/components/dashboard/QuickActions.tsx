@@ -5,8 +5,7 @@ import {
   Swords,
   Cpu,
   Trophy,
-  Zap,
-  ArrowRight
+  Zap
 } from "lucide-react";
 
 type QuickAction = {
@@ -40,7 +39,7 @@ const actions: QuickAction[] = [
     description: "Join competitive events",
     icon: Trophy,
     href: "/app/tournaments",
-    gradient: "from-amber-600 to-orange-600",
+    gradient: "from-amber-500 to-live-orange",
     glowColor: "group-hover:shadow-amber-500/20"
   },
   {
@@ -62,8 +61,8 @@ export default function QuickActions() {
       aria-label="Quick actions"
     >
       <div className="flex items-center gap-2 mb-3 px-1">
-        <Zap className="h-4 w-4 text-amber-400" />
-        <h2 className="text-sm font-bold text-white tracking-wider uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>
+        <Zap className="h-4 w-4 text-live-400" />
+        <h2 className="text-sm font-bold text-white tracking-wider uppercase font-display">
           Quick Actions
         </h2>
       </div>
@@ -80,14 +79,14 @@ export default function QuickActions() {
             >
               <Link
                 to={action.href}
-                className={`group flex flex-col items-center gap-2.5 rounded-2xl border border-slate-800/60 bg-slate-900/40 backdrop-blur-sm p-4 text-center transition-all duration-300 hover:border-slate-700/50 hover:bg-slate-800/40 hover:shadow-xl ${action.glowColor} hover:-translate-y-1`}
+                className={`group flex flex-col items-center gap-2.5 rounded-2xl glass-panel-hover p-4 text-center ${action.glowColor} hover:-translate-y-1`}
               >
                 <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
                   <Icon className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white">{action.label}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-500 leading-tight">{action.description}</p>
+                  <p className="text-xs font-bold text-white font-display">{action.label}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400 leading-tight font-body">{action.description}</p>
                 </div>
               </Link>
             </motion.div>

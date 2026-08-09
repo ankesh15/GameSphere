@@ -58,23 +58,26 @@ export default function MatchOfferOverlay() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-xl p-4 font-body">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 15 }}
-          className="w-full max-w-md rounded-3xl border border-brand-500/30 bg-slate-900/90 p-8 shadow-2xl shadow-brand-500/15 text-center relative overflow-hidden"
+          className="w-full max-w-md rounded-3xl glass-level-3 border border-amber-500/40 bg-slate-950/90 p-8 shadow-2xl shadow-amber-500/15 text-center relative overflow-hidden font-body"
         >
-          {/* Radial glow background */}
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          {/* Top urgency indicator strip */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400" />
+
+          {/* Radial amber glow background */}
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
           {/* SVG Gradient Circular Ring Countdown */}
           <div className="relative mx-auto w-28 h-28 flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <defs>
-                <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8b5cf6" />
-                  <stop offset="100%" stopColor="#ec4899" />
+                <linearGradient id="liveAmberGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#F59E0B" />
+                  <stop offset="100%" stopColor="#FF6B00" />
                 </linearGradient>
               </defs>
               <circle
@@ -89,7 +92,7 @@ export default function MatchOfferOverlay() {
                 cx="50"
                 cy="50"
                 r="42"
-                stroke="url(#neonGradient)"
+                stroke="url(#liveAmberGradient)"
                 strokeWidth="6"
                 fill="transparent"
                 strokeDasharray="263.89"
@@ -97,26 +100,32 @@ export default function MatchOfferOverlay() {
                 className="transition-all duration-1000 ease-linear"
               />
             </svg>
-            <span className="absolute text-3xl font-black text-white tracking-tighter">{timeLeft}s</span>
+            <span className="absolute text-3xl font-black text-amber-300 font-mono tracking-tighter drop-shadow-md">{timeLeft}s</span>
           </div>
 
-          <h2 className="mt-6 text-2xl font-black text-white tracking-tight">Match Found!</h2>
-          <p className="mt-1 text-xs text-slate-400">Ready up to join the squad lobby</p>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+            </span>
+            <h2 className="text-2xl font-black text-white tracking-tight font-display">Live Match Found!</h2>
+          </div>
+          <p className="mt-1 text-xs text-slate-300 font-body">Ready up immediately to lock in your squad slot</p>
 
           {/* Game Details Card */}
-          <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 flex items-center gap-4 text-left">
+          <div className="mt-5 rounded-2xl glass-level-1 border border-white/10 p-4 flex items-center gap-4 text-left font-body">
             {game?.imageUrl ? (
-              <img src={game.imageUrl} alt={game.title} className="w-14 h-14 object-cover rounded-xl border border-slate-850" />
+              <img src={game.imageUrl} alt={game.title} className="w-14 h-14 object-cover rounded-xl border border-white/10 shadow-md" />
             ) : (
-              <div className="w-14 h-14 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-slate-900 border border-white/10 rounded-xl flex items-center justify-center text-xl">
                 🎮
               </div>
             )}
             <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">{game?.title || activeMatchOffer.gameId}</h3>
-              <p className="text-[10px] text-slate-500 mt-0.5 capitalize">Server: {activeMatchOffer.region || "Global"}</p>
-              <p className="text-[10px] font-bold text-brand-400 mt-1">
-                Lobby: {acceptedPlayersCount} of {totalPlayers} ready
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider font-body">{game?.title || activeMatchOffer.gameId}</h3>
+              <p className="text-[10px] text-slate-400 mt-0.5 capitalize font-body">Server: {activeMatchOffer.region || "Global"}</p>
+              <p className="text-[10px] font-extrabold text-amber-400 mt-1 font-body">
+                Lobby Status: {acceptedPlayersCount} of {totalPlayers} ready
               </p>
             </div>
           </div>
@@ -131,8 +140,8 @@ export default function MatchOfferOverlay() {
                     key={pid}
                     className={`h-2.5 rounded-full transition-all duration-300 ${
                       accepted
-                        ? "w-8 bg-gradient-to-r from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/20"
-                        : "w-4 bg-slate-800"
+                        ? "w-8 bg-gradient-to-r from-amber-400 to-amber-500 shadow-md shadow-amber-500/30"
+                        : "w-4 bg-slate-800/80 border border-white/5"
                     }`}
                   />
                 );
@@ -141,26 +150,26 @@ export default function MatchOfferOverlay() {
           </div>
 
           {/* Accept / Decline CTA */}
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex gap-4 font-body">
             <button
               onClick={handleDecline}
               disabled={hasAccepted}
-              className="flex-1 py-3.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-900 transition disabled:opacity-50"
+              className="flex-1 py-3.5 rounded-xl glass-level-1 border border-white/10 text-xs font-bold text-slate-300 hover:text-white hover:border-white/20 transition disabled:opacity-50 font-body uppercase tracking-wider"
             >
               Decline
             </button>
             <button
               onClick={handleAccept}
               disabled={hasAccepted}
-              className={`flex-1 py-3.5 rounded-xl text-xs font-bold transition ${
+              className={`flex-1 py-3.5 rounded-xl text-xs font-bold transition font-body uppercase tracking-wider ${
                 hasAccepted
-                  ? "bg-emerald-500/10 border border-emerald-500/25 text-emerald-400"
+                  ? "bg-emerald-500/15 border border-emerald-500/40 text-emerald-300"
                   : "glow-button bg-brand-600 hover:bg-brand-500 text-white"
               }`}
             >
               {hasAccepted ? (
-                <span className="flex items-center justify-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> Ready
+                <span className="flex items-center justify-center gap-1.5 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Ready
                 </span>
               ) : (
                 "Accept Match"

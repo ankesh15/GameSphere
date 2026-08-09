@@ -125,7 +125,7 @@ export default function MatchRequestForm() {
   const selectedQueuedGame = GAMES_CATALOG.find((g) => g.gameId === queuedGameId);
 
   return (
-    <div className="w-full">
+    <div className="w-full font-body">
       <AnimatePresence mode="wait">
         {isQueued ? (
           <motion.div
@@ -133,55 +133,62 @@ export default function MatchRequestForm() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="rounded-3xl border border-brand-500/20 bg-slate-900/40 p-8 text-center relative overflow-hidden flex flex-col items-center backdrop-blur-xl"
+            className="rounded-3xl border border-amber-500/35 bg-amber-500/5 p-8 text-center relative overflow-hidden flex flex-col items-center backdrop-blur-2xl shadow-2xl shadow-amber-500/10"
           >
             {/* Background elements */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl" />
+            <div className="absolute -top-10 -right-10 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400" />
 
             {/* Radar Animation */}
             <div className="relative w-36 h-36 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border border-brand-500/10 animate-pulse-slow"></div>
-              <div className="absolute inset-4 rounded-full border border-brand-500/20 animate-ping opacity-30"></div>
-              <div className="absolute inset-8 rounded-full border border-brand-500/30 animate-spin opacity-20" style={{ animationDuration: "12s" }}>
-                <div className="w-2 h-2 rounded-full bg-brand-500 absolute top-0 left-1/2 -translate-x-1/2" />
+              <div className="absolute inset-0 rounded-full border border-amber-500/20 animate-pulse-slow"></div>
+              <div className="absolute inset-4 rounded-full border border-amber-500/30 animate-ping opacity-40"></div>
+              <div className="absolute inset-8 rounded-full border border-amber-500/40 animate-spin opacity-30" style={{ animationDuration: "10s" }}>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 absolute top-0 left-1/2 -translate-x-1/2 shadow-lg shadow-amber-400" />
               </div>
-              <div className="relative w-20 h-20 rounded-full bg-slate-950 border border-brand-500/40 flex items-center justify-center text-white shadow-2xl shadow-brand-500/20 overflow-hidden">
+              <div className="relative w-20 h-20 rounded-full bg-slate-950 border-2 border-amber-500/50 flex items-center justify-center text-white shadow-2xl shadow-amber-500/30 overflow-hidden">
                 {selectedQueuedGame?.imageUrl ? (
-                  <img src={selectedQueuedGame.imageUrl} alt="" className="w-full h-full object-cover opacity-80" />
+                  <img src={selectedQueuedGame.imageUrl} alt="" className="w-full h-full object-cover opacity-85" />
                 ) : (
-                  <Compass className="w-8 h-8 text-brand-400 animate-spin" style={{ animationDuration: "8s" }} />
+                  <Compass className="w-8 h-8 text-amber-400 animate-spin" style={{ animationDuration: "8s" }} />
                 )}
               </div>
             </div>
 
-            <h3 className="mt-6 text-xl font-black text-white tracking-tight">Searching for Teammates...</h3>
-            <p className="mt-1.5 text-xs text-slate-400">
+            <div className="mt-6 flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <h3 className="text-xl font-black text-white tracking-tight font-display">Searching for Teammates...</h3>
+            </div>
+            <p className="mt-1.5 text-xs text-slate-300 font-body">
               Game: <span className="text-white font-bold">{selectedQueuedGame?.title || queuedGameId}</span>
             </p>
 
             {/* Search timer HUD */}
             <div className="mt-5 space-y-1">
-              <div className="text-3xl font-mono font-black text-white tracking-widest bg-slate-950 border border-slate-850 px-6 py-2.5 rounded-2xl shadow-inner">
+              <div className="text-3xl font-mono font-black text-amber-300 tracking-widest bg-slate-950/90 border border-amber-500/30 px-7 py-2.5 rounded-2xl shadow-inner shadow-amber-500/10">
                 {formatTime(elapsedTime)}
               </div>
-              <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Elapsed Wait Time</span>
+              <span className="text-[9px] text-amber-400/80 uppercase tracking-widest font-extrabold font-body block pt-1">Elapsed Wait Time</span>
             </div>
 
-            <div className="mt-6 pt-5 border-t border-slate-800/40 w-full grid grid-cols-2 gap-4 text-[10px] text-slate-400">
-              <div className="text-center bg-slate-950/30 py-2 rounded-xl border border-slate-900">
-                <span className="text-slate-550 block uppercase font-bold tracking-wider">Estimated Wait</span>
-                <span className="text-slate-350 font-semibold block mt-0.5">02:15</span>
+            <div className="mt-6 pt-5 border-t border-white/10 w-full grid grid-cols-2 gap-4 text-[10px] text-slate-300 font-body">
+              <div className="text-center bg-slate-950/60 py-2.5 rounded-xl border border-white/5">
+                <span className="text-slate-400 block uppercase font-bold tracking-wider">Estimated Wait</span>
+                <span className="text-white font-semibold font-mono block mt-0.5">02:15</span>
               </div>
-              <div className="text-center bg-slate-950/30 py-2 rounded-xl border border-slate-900">
-                <span className="text-slate-550 block uppercase font-bold tracking-wider">Network Ping</span>
-                <span className="text-brand-400 font-semibold block mt-0.5">~32ms</span>
+              <div className="text-center bg-slate-950/60 py-2.5 rounded-xl border border-white/5">
+                <span className="text-slate-400 block uppercase font-bold tracking-wider">Network Ping</span>
+                <span className="text-amber-400 font-semibold font-mono block mt-0.5">~32ms</span>
               </div>
             </div>
 
             <button
               onClick={handleCancel}
               disabled={canceling}
-              className="glow-button mt-8 w-full py-3.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-xs font-bold text-rose-400 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="glow-button mt-8 w-full py-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-bold text-rose-300 transition disabled:opacity-50 flex items-center justify-center gap-2 font-body uppercase tracking-wider"
             >
               {canceling && <RotateCw className="w-3.5 h-3.5 animate-spin" />}
               <span>{canceling ? "Canceling Request..." : "Cancel Matchmaking Request"}</span>
@@ -193,25 +200,25 @@ export default function MatchRequestForm() {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="space-y-6 bg-slate-900/20 border border-slate-900 p-6 rounded-3xl"
+            className="space-y-6 glass-level-2 border border-white/10 p-6 rounded-3xl shadow-2xl font-body"
             onSubmit={handleSubmit}
           >
-            <div className="border-b border-slate-800/60 pb-3 flex items-center gap-2.5">
-              <Settings className="w-4.5 h-4.5 text-brand-400" />
+            <div className="border-b border-white/10 pb-3 flex items-center gap-2.5">
+              <Settings className="w-4.5 h-4.5 text-brand-300" />
               <div>
-                <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">Match Settings</h3>
-                <p className="text-[10px] text-slate-500">Configure parameters for optimal skill matching.</p>
+                <h3 className="text-sm font-extrabold text-white uppercase tracking-wider font-display">Match Settings</h3>
+                <p className="text-[10px] text-slate-400 font-body">Configure parameters for optimal skill matching.</p>
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 font-body">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-body">
                   <Play className="w-3 h-3 text-brand-400" />
                   <span>Choose Game</span>
                 </label>
                 <select
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                   value={gameId}
                   onChange={(event) => setGameId(event.target.value)}
                 >
@@ -224,12 +231,12 @@ export default function MatchRequestForm() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 font-body">
                   <Globe className="w-3.5 h-3.5 text-brand-400" />
                   <span>Lobby Region</span>
                 </label>
                 <select
-                  className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white focus:border-brand-500 focus:outline-none"
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 text-xs text-white focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
                   value={region}
                   onChange={(event) => setRegion(event.target.value)}
                 >
@@ -244,20 +251,20 @@ export default function MatchRequestForm() {
             </div>
 
             {/* Custom Sliders */}
-            <div className="space-y-6">
+            <div className="space-y-6 font-body">
               <div className="space-y-2">
-                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">
                   <span className="flex items-center gap-1.5">
                     <Sliders className="w-3.5 h-3.5 text-brand-400" />
                     Target Skill Level
                   </span>
-                  <span className="text-brand-400 font-mono text-xs">{skill} / 10</span>
+                  <span className="text-brand-300 font-mono text-xs">{skill} / 10</span>
                 </div>
                 <input
                   type="range"
                   min="1"
                   max="10"
-                  className="w-full accent-brand-500 h-1 bg-slate-950 rounded-lg cursor-pointer appearance-none"
+                  className="w-full accent-brand-500 h-1.5 bg-slate-950/80 border border-white/10 rounded-lg cursor-pointer appearance-none"
                   value={skill}
                   onChange={(e) => setSkill(Number(e.target.value))}
                 />
@@ -265,38 +272,38 @@ export default function MatchRequestForm() {
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">
                     <span className="flex items-center gap-1.5">
                       <Wifi className="w-3.5 h-3.5 text-brand-400" />
                       Expected Ping
                     </span>
-                    <span className="text-brand-400 font-mono text-xs">{pingMs}ms</span>
+                    <span className="text-brand-300 font-mono text-xs">{pingMs}ms</span>
                   </div>
                   <input
                     type="range"
                     min="10"
                     max="300"
                     step="5"
-                    className="w-full accent-brand-500 h-1 bg-slate-950 rounded-lg cursor-pointer appearance-none"
+                    className="w-full accent-brand-500 h-1.5 bg-slate-950/80 border border-white/10 rounded-lg cursor-pointer appearance-none"
                     value={pingMs}
                     onChange={(e) => setPingMs(Number(e.target.value))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-slate-300 font-body">
                     <span className="flex items-center gap-1.5">
-                      <Wifi className="w-3.5 h-3.5 text-rose-500" />
+                      <Wifi className="w-3.5 h-3.5 text-rose-400" />
                       Max Tolerable Ping
                     </span>
-                    <span className="text-rose-450 font-mono text-xs">{maxPingMs}ms</span>
+                    <span className="text-rose-400 font-mono text-xs">{maxPingMs}ms</span>
                   </div>
                   <input
                     type="range"
                     min="50"
                     max="500"
                     step="10"
-                    className="w-full accent-brand-500 h-1 bg-slate-950 rounded-lg cursor-pointer appearance-none"
+                    className="w-full accent-brand-500 h-1.5 bg-slate-950/80 border border-white/10 rounded-lg cursor-pointer appearance-none"
                     value={maxPingMs}
                     onChange={(e) => setMaxPingMs(Number(e.target.value))}
                   />
@@ -304,14 +311,14 @@ export default function MatchRequestForm() {
               </div>
             </div>
 
-            {validationMessage && <p className="text-xs text-rose-400">{validationMessage}</p>}
-            {error && <p className="text-xs text-rose-400">{error}</p>}
-            {status && <p className="text-xs text-emerald-400">{status}</p>}
+            {validationMessage && <p className="text-xs text-rose-400 font-semibold font-body">{validationMessage}</p>}
+            {error && <p className="text-xs text-rose-400 font-semibold font-body">{error}</p>}
+            {status && <p className="text-xs text-emerald-400 font-semibold font-body">{status}</p>}
 
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="glow-button flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50"
+                className="glow-button flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-xs font-bold text-white hover:bg-brand-500 transition disabled:opacity-50 font-body uppercase tracking-wider"
                 disabled={Boolean(validationMessage) || submitting}
               >
                 {submitting && <RotateCw className="w-3.5 h-3.5 animate-spin" />}

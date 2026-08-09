@@ -6,45 +6,110 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply bg-obsidian-950 text-slate-100 antialiased font-body selection:bg-brand-500/30 selection:text-brand-300;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    @apply font-display tracking-tight text-white;
+  }
+
+  /* Accessible Focus Rings for Dark Glass Surfaces */
+  :focus-visible {
+    outline: 2px solid #a78bfa !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.6) !important;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid #a78bfa !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.6) !important;
   }
 }
 
-/* Glassmorphism Panel styles */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+/* Specific Focus Utilities */
+.focus-ring-live:focus-visible {
+  outline: 2px solid #ffaa5e !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 12px rgba(255, 170, 94, 0.7) !important;
 }
 
-.glass-panel-hover {
-  @apply transition-all duration-300 hover:border-brand-500/30 hover:shadow-2xl hover:shadow-brand-500/5;
-  background: rgba(15, 23, 42, 0.45);
+/* Glassmorphism Token Surfaces */
+.glass-level-1 {
+  background: rgba(11, 16, 29, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-.glass-panel-hover:hover {
+
+.glass-level-2 {
   background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}
+
+.glass-level-3 {
+  background: rgba(6, 9, 19, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* Glass Interactive Hover */
+.glass-panel-hover {
+  @apply transition-all duration-300 hover:border-brand-500/35 hover:shadow-2xl hover:shadow-brand-500/10 hover:bg-slate-900/70;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+}
+
+/* Signature "Live System" Visual Tokens */
+.live-glass-panel {
+  background: rgba(255, 107, 0, 0.04);
+  border: 1px solid rgba(255, 107, 0, 0.35);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 0 25px rgba(255, 107, 0, 0.12);
+}
+
+.live-badge {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-live-orange/40 text-live-400 animate-pulse-live;
+  background-color: rgba(255, 107, 0, 0.12);
+}
+
+.live-indicator-dot {
+  @apply w-2 h-2 rounded-full bg-live-orange shadow-[0_0_10px_#ff6b00] animate-ping;
 }
 
 /* Text Gradients */
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-indigo-300 to-purple-400;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-300 via-brand-400 to-indigo-300;
 }
 
-.text-gradient-fire {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-amber-400 to-orange-500;
+.text-gradient-live {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-live-400 to-red-500;
 }
 
-/* Glow button styling */
+/* Unified Glow Button System */
 .glow-button {
-  @apply relative overflow-hidden transition-all duration-300 active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.3)];
+  @apply relative overflow-hidden transition-all duration-300 active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.4)];
 }
 .glow-button:hover {
   @apply shadow-[0_0_25px_rgba(139,92,246,0.45)];
+}
+
+.glow-button-live {
+  @apply relative overflow-hidden transition-all duration-300 active:scale-95 bg-gradient-to-r from-amber-500 to-live-orange text-white font-bold shadow-[0_4px_20px_rgba(255,107,0,0.3)] focus-ring-live;
+}
+.glow-button-live:hover {
+  @apply shadow-[0_0_25px_rgba(255,107,0,0.6)];
 }
 
 /* Custom Scrollbar */
@@ -53,12 +118,32 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #060913;
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6;
+  background: #7c3aed;
+}
+
+/* Reduced Motion Preference Accessibility Guarantee */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse-live,
+  .animate-ping,
+  .animate-pulse-slow,
+  .animate-float,
+  .animate-shimmer,
+  .animate-spin,
+  .animate-pulse {
+    animation: none !important;
+  }
 }

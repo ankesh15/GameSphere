@@ -117,7 +117,7 @@ export default function RegisterPage() {
         transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.1 }}
         className="w-full max-w-md"
       >
-        <div className="glass-panel rounded-2xl p-8 shadow-2xl shadow-brand-950/20">
+        <div className="glass-level-2 rounded-2xl p-8 shadow-2xl border border-white/10">
           {/* Logo / Brand */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}

@@ -59,6 +59,7 @@ apiClient.interceptors.response.use(
     const backendMessage = extractErrorMessage(error);
     const enhancedError = new Error(backendMessage);
     (enhancedError as any).statusCode = error.response?.status;
+    (enhancedError as any).response = error.response;
     (enhancedError as any).originalError = error;
     return Promise.reject(enhancedError);
   }

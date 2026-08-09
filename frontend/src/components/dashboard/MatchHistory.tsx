@@ -41,7 +41,7 @@ function getTimeAgo(dateStr?: string): string {
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
   completed: { label: "Victory", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-  active: { label: "Live", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+  active: { label: "Live", color: "text-live-400", bg: "bg-live-orange/10", border: "border-live-orange/30" },
   pending: { label: "Pending", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
   declined: { label: "Declined", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
   cancelled: { label: "Cancelled", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20" },
@@ -73,22 +73,22 @@ export default function MatchHistory() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.5 }}
-      className="rounded-2xl border border-slate-800/60 bg-slate-900/40 backdrop-blur-sm overflow-hidden"
+      className="rounded-2xl glass-level-2 overflow-hidden"
       aria-label="Match history"
     >
-      <div className="flex items-center justify-between px-6 pt-5 pb-3">
-        <h2 className="text-sm font-bold text-white tracking-wider uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>
+      <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-white/5">
+        <h2 className="text-sm font-bold text-white tracking-wider uppercase font-display">
           Match History
         </h2>
         <Link
           to="/app/find-teammates"
-          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-300 hover:text-brand-200 transition-colors font-body"
         >
           Matchmaking <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
 
-      <div className="px-4 pb-4 space-y-1.5 min-h-[160px]">
+      <div className="p-4 space-y-1.5 min-h-[160px]">
         {loading ? (
           <div className="flex flex-col gap-2 justify-center items-center py-10 text-slate-500 text-xs">
             <Sparkles className="w-5 h-5 animate-pulse text-brand-400" />
@@ -97,7 +97,7 @@ export default function MatchHistory() {
         ) : sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-slate-500 space-y-2">
             <Inbox className="w-8 h-8 text-slate-700" />
-            <p className="text-xs">No match sessions found. Join queue to start a match!</p>
+            <p className="text-xs font-body">No match sessions found. Join queue to start a match!</p>
           </div>
         ) : (
           sessions.map((match, index) => {
@@ -113,20 +113,18 @@ export default function MatchHistory() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + index * 0.05 }}
-                className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-slate-800/30 cursor-default"
+                className="group flex items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-slate-800/40 cursor-default"
               >
-                {/* Game icon */}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800/60 border border-slate-700/30">
-                  <Gamepad2 className="h-4.5 w-4.5 text-slate-400 group-hover:text-brand-400 transition-colors" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80 border border-white/5">
+                  <Gamepad2 className="h-4.5 w-4.5 text-slate-400 group-hover:text-brand-300 transition-colors" />
                 </div>
 
-                {/* Match info */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white truncate">{gameName}</span>
-                    <span className="text-[10px] text-slate-500">{modeName}</span>
+                    <span className="text-xs font-bold text-white truncate font-display">{gameName}</span>
+                    <span className="text-[10px] text-slate-400 font-body">{modeName}</span>
                   </div>
-                  <div className="mt-0.5 flex items-center gap-3 text-[10px] text-slate-500">
+                  <div className="mt-0.5 flex items-center gap-3 text-[10px] text-slate-500 font-body">
                     <span className="inline-flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       Session
@@ -138,19 +136,16 @@ export default function MatchHistory() {
                   </div>
                 </div>
 
-                {/* Score / ID info */}
                 <div className="hidden sm:flex items-center gap-2">
                   <Swords className="h-3.5 w-3.5 text-slate-600" />
                   <span className="text-[11px] font-mono text-slate-400">#{match._id.slice(-6)}</span>
                 </div>
 
-                {/* Result badge */}
-                <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${conf.color} ${conf.bg} ${conf.border}`}>
+                <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold font-body ${conf.color} ${conf.bg} ${conf.border}`}>
                   {conf.label}
                 </span>
 
-                {/* Time */}
-                <span className="hidden sm:block shrink-0 text-[10px] font-medium text-slate-600 w-14 text-right">
+                <span className="hidden sm:block shrink-0 text-[10px] font-medium text-slate-500 font-mono w-14 text-right">
                   {timeAgo}
                 </span>
               </motion.div>

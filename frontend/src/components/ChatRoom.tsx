@@ -165,28 +165,28 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
   };
 
   return (
-    <div className="flex flex-col h-[520px] rounded-3xl border border-slate-900 bg-slate-950/75 overflow-hidden backdrop-blur-md shadow-2xl relative">
+    <div className="flex flex-col h-[520px] rounded-3xl glass-level-2 border border-white/10 overflow-hidden backdrop-blur-2xl shadow-2xl relative font-body">
       {/* Header */}
-      <div className="border-b border-slate-900 bg-slate-900/40 px-5 py-4 flex items-center justify-between">
+      <div className="border-b border-white/10 bg-slate-950/80 px-5 py-4 flex items-center justify-between font-body">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400">
+          <div className="w-8 h-8 rounded-xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center text-brand-300 shadow-sm">
             <MessageSquare className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs font-black text-white uppercase tracking-widest block">Live Channel Session</span>
-            <p className="text-[9px] text-slate-500 mt-0.5">Real-time socket data streams active</p>
+            <span className="text-xs font-black text-white uppercase tracking-widest block font-display">Live Channel Session</span>
+            <p className="text-[9px] text-slate-400 mt-0.5 font-body">Real-time socket data telemetry streams active</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[9px] font-extrabold text-emerald-400 font-body">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
           <span>ONLINE</span>
         </div>
       </div>
 
       {/* Messages list */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="flex-1 overflow-y-auto p-5 space-y-4 font-body">
         {loading ? (
-          <div className="flex flex-col gap-2 justify-center items-center h-full text-slate-500 text-xs">
+          <div className="flex flex-col gap-2 justify-center items-center h-full text-slate-400 text-xs font-body">
             <Sparkles className="w-5 h-5 animate-pulse text-brand-400" />
             <span className="font-mono text-[10px]">fetching telemetry logs...</span>
           </div>
@@ -202,7 +202,7 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
         ) : messages.length === 0 ? (
           <div className="h-full flex items-center justify-center p-4">
             <EmptyState
-              icon={<MessageSquare className="w-8 h-8 text-slate-700" />}
+              icon={<MessageSquare className="w-8 h-8 text-slate-600" />}
               title="No Messages Yet"
               description="Establish communications in this channel by sending your first squad message below."
             />
@@ -221,27 +221,27 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
                 className={`flex gap-3 items-start ${isMe ? "flex-row-reverse" : "flex-row"}`}
               >
                 {/* Avatar Icon */}
-                <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold border ${
+                <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold border font-display transition-all ${
                   isMe
-                    ? "bg-brand-500/20 border-brand-500/30 text-white"
-                    : "bg-slate-900 border-slate-800 text-slate-300"
+                    ? "bg-brand-600/30 border-brand-500/50 text-white shadow-sm"
+                    : "glass-level-1 border-white/10 text-slate-300"
                 }`}>
                   {senderTag.slice(0, 2).toUpperCase()}
                 </div>
 
                 <div className="space-y-1 max-w-[70%]">
                   <div className={`flex items-baseline gap-2 ${isMe ? "justify-end" : "justify-start"}`}>
-                    <span className="text-[10px] font-extrabold text-slate-400">
+                    <span className={`text-[10px] font-extrabold ${isMe ? "text-brand-300" : "text-slate-400"} font-body`}>
                       {senderTag}
                     </span>
-                    <span className="text-[8px] text-slate-600 font-mono">
+                    <span className="text-[8px] text-slate-500 font-mono">
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <p className={`text-xs px-3.5 py-2.5 rounded-2xl leading-relaxed break-words border ${
+                  <p className={`text-xs px-4 py-2.5 rounded-2xl leading-relaxed break-words border font-body ${
                     isMe
-                      ? "bg-brand-600/10 border-brand-500/20 text-white rounded-tr-none"
-                      : "bg-slate-900/50 border-slate-850 text-slate-200 rounded-tl-none"
+                      ? "glass-level-1 bg-brand-500/15 border-brand-500/30 text-white rounded-tr-none shadow-md shadow-brand-500/5"
+                      : "glass-level-1 bg-slate-950/60 border-white/10 text-slate-200 rounded-tl-none"
                   }`}>
                     {msg.content}
                   </p>
@@ -255,8 +255,8 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
 
       {/* Typing indicator */}
       {typingUsers.length > 0 && (
-        <div className="px-5 py-2 text-[9px] text-slate-500 bg-slate-950/40 flex items-center gap-2 border-t border-slate-900/30 font-semibold tracking-wide">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-bounce"></span>
+        <div className="px-5 py-2 text-[9px] text-slate-300 bg-slate-950/60 flex items-center gap-2 border-t border-white/5 font-semibold tracking-wide font-body">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse"></span>
           <span>
             {typingUsers.map((uid) => profiles[uid] || `User_${uid.slice(-4)}`).join(", ")} is typing...
           </span>
@@ -264,10 +264,10 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
       )}
 
       {/* Input panel */}
-      <form onSubmit={handleSend} className="border-t border-slate-900 bg-slate-900/30 p-4 flex gap-2">
+      <form onSubmit={handleSend} className="border-t border-white/10 bg-slate-950/70 p-4 flex gap-2 font-body">
         <input
           type="text"
-          className="flex-1 rounded-xl border border-slate-850 bg-slate-950 px-4 py-3 text-xs text-white placeholder-slate-600 focus:border-brand-500 focus:outline-none"
+          className="flex-1 rounded-xl border border-white/10 bg-slate-950/90 px-4 py-3 text-xs text-white placeholder-slate-500 focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-body"
           placeholder="Message this channel session..."
           value={inputText}
           onChange={handleInputChange}
@@ -276,7 +276,7 @@ export default function ChatRoom({ roomId }: ChatRoomProps) {
         <button
           type="submit"
           disabled={!inputText.trim()}
-          className="glow-button shrink-0 w-11 h-11 rounded-xl bg-brand-600 flex items-center justify-center text-white hover:bg-brand-500 transition disabled:opacity-50 disabled:shadow-none"
+          className="glow-button shrink-0 w-11 h-11 rounded-xl bg-brand-600 flex items-center justify-center text-white hover:bg-brand-500 transition disabled:opacity-40 disabled:shadow-none"
         >
           <Send className="w-4 h-4" />
         </button>

@@ -106,28 +106,28 @@ export default function AppShell() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-brand-500/30 selection:text-white">
+    <div className="min-h-screen bg-obsidian-950 text-slate-100 flex flex-col font-body selection:bg-brand-500/30 selection:text-white">
       <MatchOfferOverlay />
 
       {/* Header / Navbar */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-900 bg-slate-950/65 backdrop-blur-xl transition-all duration-300">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-obsidian-950/80 backdrop-blur-2xl transition-all duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo area */}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/app")}>
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
-                <span className="text-white font-extrabold text-sm tracking-tighter">GS</span>
+              <div className="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <span className="text-white font-extrabold text-sm tracking-tighter font-display">GS</span>
               </div>
-              <span className="text-lg font-black text-white tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+              <span className="text-lg font-black text-white tracking-wider uppercase font-display">
                 GameSphere
               </span>
-              <span className="hidden sm:inline-block rounded-full bg-brand-500/10 border border-brand-500/20 px-2 py-0.5 text-[10px] font-bold text-brand-400">
+              <span className="hidden sm:inline-block rounded-full bg-brand-500/10 border border-brand-500/30 px-2 py-0.5 text-[9px] font-bold text-brand-300 font-body uppercase tracking-widest">
                 PRO
               </span>
             </div>
 
             {/* Desktop Nav Items */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1 font-body">
               {navItems.map((item) => {
                 const isActive =
                   item.path === "/app"

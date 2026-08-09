@@ -34,10 +34,10 @@ const matchesPerWeek = [
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
   return (
-    <div className="rounded-lg border border-slate-700/60 bg-slate-900/95 backdrop-blur-md px-3 py-2 shadow-xl">
-      <p className="text-[10px] font-bold text-slate-400 mb-1">{label}</p>
+    <div className="rounded-xl glass-level-3 px-3 py-2 shadow-xl border border-white/10">
+      <p className="text-[10px] font-bold text-slate-400 font-mono mb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
-        <p key={i} className="text-xs font-semibold" style={{ color: entry.color }}>
+        <p key={i} className="text-xs font-semibold font-body" style={{ color: entry.color }}>
           {entry.name}: {entry.value}
         </p>
       ))}
@@ -55,12 +55,12 @@ export default function Charts() {
       aria-label="Performance charts"
     >
       {/* Win Rate Area Chart */}
-      <div className="rounded-2xl border border-slate-800/60 bg-slate-900/40 backdrop-blur-sm p-5">
+      <div className="rounded-2xl glass-level-2 p-5 border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>
+          <h3 className="text-sm font-bold text-white font-display">
             Win Rate
           </h3>
-          <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-0.5 font-body">
             +12% this week
           </span>
         </div>
@@ -69,7 +69,7 @@ export default function Charts() {
             <AreaChart data={winRateData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="winsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
                   <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                 </linearGradient>
               </defs>
@@ -100,12 +100,12 @@ export default function Charts() {
       </div>
 
       {/* Matches Per Day Bar Chart */}
-      <div className="rounded-2xl border border-slate-800/60 bg-slate-900/40 backdrop-blur-sm p-5">
+      <div className="rounded-2xl glass-level-2 p-5 border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>
+          <h3 className="text-sm font-bold text-white font-display">
             Matches This Week
           </h3>
-          <span className="text-[10px] font-semibold text-brand-400 bg-brand-500/10 rounded-full px-2 py-0.5">
+          <span className="text-[10px] font-semibold text-brand-300 bg-brand-500/10 rounded-full px-2 py-0.5 font-body">
             43 total
           </span>
         </div>

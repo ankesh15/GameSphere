@@ -45,7 +45,7 @@ export default function AIDiscoveryPage() {
         myProfile = await getMyProfile();
         setProfile(myProfile);
       } catch (err: any) {
-        if (err.response?.status === 404) {
+        if (err.statusCode === 404 || err.response?.status === 404) {
           setProfile(null);
           setLoading(false);
           setRefreshing(false);

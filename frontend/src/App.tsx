@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import AppShell from "./components/AppShell";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ModalDialog from "./components/ModalDialog";
@@ -14,15 +15,17 @@ import NotFoundPage from "./pages/NotFound";
 import RegisterPage from "./pages/Register";
 import MatchSessionPage from "./pages/MatchSession";
 import TournamentsPage from "./pages/Tournaments";
+import DesignSystemShowcase from "./components/DesignSystemShowcase";
 
 export default function App() {
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <ModalDialog />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/design-system" element={<DesignSystemShowcase />} />
         <Route
           element={
             <ProtectedRoute>
@@ -41,7 +44,7 @@ export default function App() {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </>
+    </MotionConfig>
   );
 }
 

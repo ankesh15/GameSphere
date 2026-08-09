@@ -28,7 +28,7 @@ export default function ModalDialog() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-2xl relative overflow-hidden"
+              className="w-full max-w-md rounded-3xl glass-level-3 p-6 shadow-2xl relative overflow-hidden"
             >
               <div
                 className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
